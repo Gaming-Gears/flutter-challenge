@@ -1,0 +1,31 @@
+name: sustainacity
+description: Game for 2024 Global Challenge
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0-279.0.dev <4.0.0'
+
+dependencies:
+  basic_utils: ^5.7.0
+  flame: ^1.14.0
+  flame_audio: ^0.1.0-rc5
+  flame_bloc: ^1.10.9
+  flame_rive: ^1.9.10
+  flutter:
+    sdk: flutter
+  json_types: ^2.0.2
+  logger: ^2.0.2+1
+  shared_preferences: ^2.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/TileA5.png
+    - assets/images/suburbs2_TileB.png
+    - assets/images/suburbs_TileE.png
+    - assets/images/cursor.png
