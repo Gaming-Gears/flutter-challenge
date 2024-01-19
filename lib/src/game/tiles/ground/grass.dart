@@ -7,10 +7,10 @@ final class Grass extends Ground {
   String get spritePath => 'TileA5.png';
 
   @override
-  int get srcTileHeight => 1;
+  int get tileHeight => 1;
 
   @override
-  int get srcTileWidth => 1;
+  int get tileWidth => 1;
 
   @override
   int get srcTileOffsetX => 0;

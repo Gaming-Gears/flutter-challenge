@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 
+import '../game.dart';
 import '../world.dart';
 import 'coordinates.dart';
 import 'tile.dart';
 
+/// Thrown when a tile is not found at the given coordinates.
 final class TileNotFound implements Exception {
   final TileCoordinates coordinates;
 
@@ -15,6 +17,7 @@ final class TileNotFound implements Exception {
   String toString() => 'No tile at $coordinates';
 }
 
+/// Thrown when a tile already exists at the given coordinates.
 final class TileAlreadyExists implements Exception {
   final TileCoordinates coordinates;
 
@@ -24,66 +27,74 @@ final class TileAlreadyExists implements Exception {
   String toString() => 'Tile already exists at $coordinates';
 }
 
-extension<T> on List<List<T?>> {
-  T? get(ArrayIndexCoordinates indices) => this[indices.xIndex][indices.yIndex];
+extension LayerTileCoordinates on TileCoordinates {
+  /// Gets the [TileCoordinates] associated with a given array index.
+  static TileCoordinates fromArrayIndex(int index) => TileCoordinates(
+      (index % SustainaCityWorld.mapSize) - (SustainaCityWorld.mapSize ~/ 2),
+      (index ~/ SustainaCityWorld.mapSize) - (SustainaCityWorld.mapSize ~/ 2));
 
-  void set(ArrayIndexCoordinates indices, T? tile) =>
-      this[indices.xIndex][indices.yIndex] = tile;
+  /// Converts the coordinates to an array index for the _tiles array in [Layer]
+  int toArrayIndex() =>
+      (y + SustainaCityWorld.mapSize ~/ 2) * SustainaCityWorld.mapSize +
+      (x + SustainaCityWorld.mapSize ~/ 2);
 }
 
-final class Layer<T extends Tile> extends Component {
-  final List<List<T?>> _tiles;
+/// Represents a single z-axis layer of tiles.
+final class Layer<T extends Tile> extends Component
+    with HasGameRef<SustainaCityGame> {
+  final List<T?> _tiles;
 
+  /// Creates a new layer, calling [tileGenerator] to populate each tile.
   Layer(T? Function(TileCoordinates) tileGenerator)
       : _tiles = List.generate(
-            SustainaCityWorld.mapSize,
-            (x) => List<T?>.generate(
-                SustainaCityWorld.mapSize,
-                (y) => tileGenerator(
-                    ArrayIndexCoordinates(x, y).toTileCoordinates())));
+            SustainaCityWorld.mapSize * SustainaCityWorld.mapSize,
+            (index) =>
+                tileGenerator(LayerTileCoordinates.fromArrayIndex(index)));
 
   @override
   FutureOr<void> onLoad() async {
-    for (final column in _tiles) {
-      for (final tile in column) {
-        if (tile != null) {
-          await add(tile);
-        }
+    for (final tile in _tiles) {
+      if (tile != null) {
+        await add(tile);
       }
     }
     return super.onLoad();
   }
 
-  T? get(TileCoordinates coordinates) =>
-      _tiles.get(coordinates.toArrayIndexCoordinates());
+  /// Returns the tile at the given coordinates.
+  T? get(TileCoordinates coordinates) => _tiles[coordinates.toArrayIndex()];
 
+  /// Removes the tile at the given coordinates.
   void removeTile(TileCoordinates coordinates) {
-    final oldTile = _tiles.get(coordinates.toArrayIndexCoordinates());
+    final oldTile = get(coordinates);
     if (oldTile == null) {
       throw TileNotFound(coordinates);
     } else {
       oldTile.forEachUnit((coordinates) {
-        final indices = coordinates.toArrayIndexCoordinates();
-        if (_tiles.get(indices) == null) {
+        if (get(coordinates) == null) {
           throw TileNotFound(coordinates);
         } else {
-          _tiles.set(indices, null);
+          _tiles[coordinates.toArrayIndex()] = null;
         }
       });
       remove(oldTile);
     }
   }
 
+  /// Sets the tile at the given coordinates.
   void setTile(T tile) {
+    // Check if the new tile would overlap with an existing tile.
     tile.forEachUnit((coordinates) {
-      if (_tiles.get(coordinates.toArrayIndexCoordinates()) != null) {
+      if (get(coordinates) != null) {
         throw TileAlreadyExists(coordinates);
       }
     });
 
-    tile.forEachUnit((coordinates) =>
-        _tiles.set(coordinates.toArrayIndexCoordinates(), tile));
+    // Once we know that the new tile is valid, add it to the layer.
+    tile.forEachUnit(
+        (coordinates) => _tiles[coordinates.toArrayIndex()] = tile);
 
+    // Add the tile to the flame component list.
     add(tile);
   }
 }

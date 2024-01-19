@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 
+import 'tiles/buildings/house.dart';
 import 'tiles/coordinates.dart';
 import 'tiles/tile.dart';
 import 'world.dart';
@@ -19,7 +22,8 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   @override
   void onTapUp(TapUpInfo info) {
     if (hoveredTile != null) {
-      world.buildHouse(hoveredTile!.coordinates);
+      world.build(House(hoveredTile!.coordinates,
+          Model.values[Random().nextInt(Model.values.length)]));
     }
     super.onTapUp(info);
   }
@@ -28,8 +32,12 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   @override
   void onSecondaryTapUp(TapUpInfo info) {
     if (hoveredTile != null) {
-      world.removeHouse(hoveredTile!.coordinates,
-          ScreenCoordinates.fromTap(info).toTileCoordinates(canvasSize));
+      world.destroy(
+          hoveredTile!.coordinates,
+          TileCoordinates(
+            (info.eventPosition.global.x - 0.5 * canvasSize.x) ~/ Tile.unitSize,
+            (info.eventPosition.global.y - 0.5 * canvasSize.y) ~/ Tile.unitSize,
+          ));
     }
     super.onSecondaryTapUp(info);
   }

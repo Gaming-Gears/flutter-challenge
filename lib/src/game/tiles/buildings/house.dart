@@ -2,25 +2,6 @@ import 'building.dart';
 
 enum Model { vertical, horizontal }
 
-extension on Model {
-  int get srcTileHeight => switch (this) {
-        Model.vertical => 10,
-        Model.horizontal => 10,
-      };
-
-  int get srcTileWidth => switch (this) {
-        Model.vertical => 5,
-        Model.horizontal => 8,
-      };
-
-  int get srcTileOffsetX => 0;
-
-  int get srcTileOffsetY => switch (this) {
-        Model.vertical => 0,
-        Model.horizontal => 6,
-      };
-}
-
 final class House extends Building {
   final Model model;
 
@@ -33,14 +14,29 @@ final class House extends Building {
       };
 
   @override
-  int get srcTileHeight => model.srcTileHeight;
+  int get tileHeight => switch (model) {
+        Model.vertical => 10,
+        Model.horizontal => 10,
+      };
 
   @override
-  int get srcTileWidth => model.srcTileWidth;
+  int get tileWidth => switch (model) {
+        Model.vertical => 5,
+        Model.horizontal => 8,
+      };
 
   @override
-  int get srcTileOffsetX => model.srcTileOffsetX;
+  int get srcTileOffsetX => 0;
 
   @override
-  int get srcTileOffsetY => model.srcTileOffsetY;
+  int get srcTileOffsetY => switch (model) {
+        Model.vertical => 0,
+        Model.horizontal => 6,
+      };
+
+  @override
+  double get price => switch (model) {
+        Model.vertical => 100,
+        Model.horizontal => 200,
+      };
 }
