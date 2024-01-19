@@ -6,8 +6,6 @@ import 'world.dart';
 
 final class SustainaCity extends FlameGame
     with SingleGameInstance, HoverCallbacks {
-  final hoveredTiles = <(int, int)>{};
-
   SustainaCity() : super(world: SustainaCityWorld()) {
     pauseWhenBackgrounded = false;
   }

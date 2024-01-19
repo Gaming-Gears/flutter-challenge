@@ -3,17 +3,15 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/flame.dart';
+import 'package:flutter/painting.dart';
 
-import '../game.dart';
 import '../world.dart';
 
 abstract base class Tile extends SpriteComponent
-    with
-        HoverCallbacks,
-        TapCallbacks,
-        HasGameRef<SustainaCity>,
-        HasWorldReference<SustainaCityWorld> {
+    with HoverCallbacks, TapCallbacks, HasWorldReference<SustainaCityWorld> {
   static const tileSize = 32.0;
+  static const hoverColor = Color.fromARGB(255, 251, 219, 67);
+  static const hoverOpacity = 0.2;
 
   final int tileX;
   final int tileY;
@@ -47,14 +45,31 @@ abstract base class Tile extends SpriteComponent
   int get srcTileWidth;
   int get srcTileHeight;
 
+  void highlight() {
+    paint.colorFilter = ColorFilter.mode(
+        hoverColor.withOpacity(hoverOpacity), BlendMode.srcATop);
+  }
+
+  void unhighlight() {
+    paint.colorFilter =
+        ColorFilter.mode(hoverColor.withOpacity(0), BlendMode.srcATop);
+  }
+
   @override
   void onHoverEnter() {
-    gameRef.hoveredTiles.add((tileX, tileY));
+    if (world.hoveredTile == null || world.hoveredTile!.priority <= priority) {
+      world.hoveredTile?.unhighlight();
+      world.hoveredTile = this;
+      highlight();
+    }
   }
 
   @override
   void onHoverExit() {
-    gameRef.hoveredTiles.remove((tileX, tileY));
+    if (world.hoveredTile == this) {
+      world.hoveredTile = null;
+    }
+    unhighlight();
   }
 
   @override
