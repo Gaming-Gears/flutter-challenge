@@ -10,7 +10,7 @@ import '../game.dart';
 import 'coordinates.dart';
 
 abstract base class Tile extends SpriteComponent
-    with HoverCallbacks, TapCallbacks, HasGameRef<SustainaCity> {
+    with HoverCallbacks, TapCallbacks, HasGameRef<SustainaCityGame> {
   static const tileSize = 32.0;
   static const hoverColor = Color.fromARGB(255, 251, 219, 67);
   static const hoverOpacity = 0.2;

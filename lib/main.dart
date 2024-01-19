@@ -11,6 +11,6 @@ Future<void> main() async {
   await Flame.device.fullScreen();
   await initializeCache();
   runApp(GameWidget(
-    game: SustainaCity(),
+    game: SustainaCityGame(),
   ));
 }

@@ -11,7 +11,7 @@ import 'tiles/coordinates.dart';
 import 'tiles/ground/grass.dart';
 import 'tiles/layer.dart';
 
-final class SustainaCityWorld extends World with HasGameRef<SustainaCity> {
+final class SustainaCityWorld extends World with HasGameRef<SustainaCityGame> {
   static const mapSize = 50;
 
   final groundLayer = Layer((coordinates) => Grass(coordinates));
