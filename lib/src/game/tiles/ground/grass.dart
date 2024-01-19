@@ -1,7 +1,7 @@
 import 'ground.dart';
 
 final class Grass extends Ground {
-  Grass(super.tileX, super.tileY) : super();
+  Grass(super.coordinates) : super();
 
   @override
   String get spritePath => 'TileA5.png';

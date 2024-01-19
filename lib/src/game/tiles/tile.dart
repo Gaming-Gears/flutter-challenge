@@ -2,30 +2,46 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:flame/extensions.dart';
 import 'package:flame/flame.dart';
 import 'package:flutter/painting.dart';
 
-import '../world.dart';
+import '../game.dart';
+import 'coordinates.dart';
 
 abstract base class Tile extends SpriteComponent
-    with HoverCallbacks, TapCallbacks, HasWorldReference<SustainaCityWorld> {
+    with HoverCallbacks, TapCallbacks, HasGameRef<SustainaCity> {
   static const tileSize = 32.0;
   static const hoverColor = Color.fromARGB(255, 251, 219, 67);
   static const hoverOpacity = 0.2;
 
-  final int tileX;
-  final int tileY;
-  final int zIndex;
+  final TileCoordinates coordinates;
 
-  Tile(this.tileX, this.tileY, {required this.zIndex})
+  Tile(this.coordinates, {required int priority})
       : super(
-          priority: zIndex,
+          priority: priority,
           position: Vector2(
-            tileX * tileSize,
-            tileY * tileSize,
+            coordinates.tileX * tileSize,
+            coordinates.tileY * tileSize,
           ),
         ) {
     paint.isAntiAlias = false;
+  }
+
+  String get spritePath;
+  int get srcTileOffsetX;
+  int get srcTileOffsetY;
+  int get srcTileWidth;
+  int get srcTileHeight;
+
+  void forEachUnit(void Function(TileCoordinates coordinates) callback) {
+    for (int x = coordinates.tileX; x < coordinates.tileX + srcTileWidth; x++) {
+      for (int y = coordinates.tileY;
+          y < coordinates.tileY + srcTileHeight;
+          y++) {
+        callback(TileCoordinates(x, y));
+      }
+    }
   }
 
   @override
@@ -39,42 +55,35 @@ abstract base class Tile extends SpriteComponent
     return await super.onLoad();
   }
 
-  String get spritePath;
-  int get srcTileOffsetX;
-  int get srcTileOffsetY;
-  int get srcTileWidth;
-  int get srcTileHeight;
+  void highlight() => paint.colorFilter =
+      ColorFilter.mode(hoverColor.withOpacity(hoverOpacity), BlendMode.srcATop);
 
-  void highlight() {
-    paint.colorFilter = ColorFilter.mode(
-        hoverColor.withOpacity(hoverOpacity), BlendMode.srcATop);
-  }
-
-  void unhighlight() {
-    paint.colorFilter =
-        ColorFilter.mode(hoverColor.withOpacity(0), BlendMode.srcATop);
-  }
+  void unhighlight() => paint.colorFilter =
+      ColorFilter.mode(hoverColor.withOpacity(0), BlendMode.srcATop);
 
   @override
   void onHoverEnter() {
-    if (world.hoveredTile == null || world.hoveredTile!.priority <= priority) {
-      world.hoveredTile?.unhighlight();
-      world.hoveredTile = this;
+    final currentlyHovered = game.hoveredTile;
+    if (currentlyHovered == null ||
+        currentlyHovered.priority <= priority ||
+        !Rect.fromLTWH(
+                currentlyHovered.coordinates.tileX.toDouble(),
+                currentlyHovered.coordinates.tileX.toDouble(),
+                currentlyHovered.srcTileWidth.toDouble(),
+                currentlyHovered.srcTileHeight.toDouble())
+            .contains(Offset(
+                coordinates.tileX.toDouble(), coordinates.tileX.toDouble()))) {
+      game.hoveredTile?.unhighlight();
+      game.hoveredTile = this;
       highlight();
     }
   }
 
   @override
   void onHoverExit() {
-    if (world.hoveredTile == this) {
-      world.hoveredTile = null;
+    if (game.hoveredTile == this) {
+      game.hoveredTile = null;
+      unhighlight();
     }
-    unhighlight();
-  }
-
-  @override
-  void onTapUp(TapUpEvent event) {
-    world.buildHouse(tileX, tileY);
-    super.onTapUp(event);
   }
 }

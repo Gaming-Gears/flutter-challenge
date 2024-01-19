@@ -27,4 +27,5 @@ flutter:
   assets:
     - assets/images/TileA5.png
     - assets/images/suburbs2_TileB.png
+    - assets/images/suburbs_TileE.png
     - assets/images/cursor.png
