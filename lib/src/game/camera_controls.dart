@@ -1,63 +1,27 @@
 import 'package:flame/components.dart';
 
-class CameraController {
-  late CameraComponent camera;
-  final Vector2 worldBounds;
+import 'world.dart';
 
-  CameraController(this.worldBounds);
+extension CameraControls on CameraComponent {
+  static const maxZoom = 3.0;
+  static const minZoom = 0.05;
+  static const zoomSpeed = 0.01;
 
-  /// Clamps the zoom to the range [0.05, 3.0].
-  void clampZoom() {
-    camera.viewfinder.zoom = camera.viewfinder.zoom.clamp(0.05, 3.0);
-  }
-
-  /// Attaches the camera to the game.
-  void attachCamera(CameraComponent camera) {
-    this.camera = camera;
+  void _clampPosition() {
+    final bounds = SustainaCityWorld.mapSizePixels * viewfinder.zoom / 2;
+    viewport.position.clampScalar(-bounds, bounds);
   }
 
   /// Moves the camera to the specified position.
-  void moveTo(Vector2 newPosition) {
-    try {
-      camera.viewport.position = Vector2(
-        newPosition.x.clamp(
-            0, worldBounds.x - camera.viewport.size.x / camera.viewfinder.zoom),
-        newPosition.y.clamp(
-            0, worldBounds.y - camera.viewport.size.y / camera.viewfinder.zoom),
-      );
-    } on Exception catch (e) {
-      throw CameraControllerException(e);
-    }
+  void pan(Vector2 newPosition) {
+    viewport.position = newPosition;
+    _clampPosition();
   }
 
   /// Zooms the camera in or out.
   void zoom(double zoomChange) {
-    try {
-      camera.viewfinder.zoom =
-          (camera.viewfinder.zoom + zoomChange).clamp(0.5, 2.0);
-    } on Exception catch (e) {
-      throw CameraControllerException(e);
-    }
+    viewfinder.zoom =
+        (viewfinder.zoom + zoomChange * zoomSpeed).clamp(minZoom, maxZoom);
+    _clampPosition();
   }
-
-  /// Clamps the camera to the map size.
-  void clampCameraToMapSize() {
-    try {
-      final double maxX =
-          worldBounds.x - camera.viewport.size.x / camera.viewfinder.zoom;
-      final double maxY =
-          worldBounds.y - camera.viewport.size.y / camera.viewfinder.zoom;
-    } on Exception catch (e) {
-      throw CameraControllerException(e);
-    }
-  }
-}
-
-/// Thrown when the camera controller is unable to move the camera.
-final class CameraControllerException implements Exception {
-  final dynamic message;
-  const CameraControllerException(this.message) : super();
-  @override
-  String toString() =>
-      'An error occurred while trying to move the camera. message: $message';
 }

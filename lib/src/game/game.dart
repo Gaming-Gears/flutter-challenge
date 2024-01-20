@@ -1,10 +1,10 @@
-import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
-import 'game_screen.dart';
+import '../screens/game_screen.dart';
+import 'camera_controls.dart';
 import 'tiles/buildings/factory.dart';
 import 'tiles/coordinates.dart';
 import 'tiles/tile.dart';
@@ -17,9 +17,7 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
         SecondaryTapDetector,
         KeyboardEvents,
         PanDetector,
-        ScaleDetector,
-        ScrollDetector,
-        HasGameReference {
+        ScrollDetector {
   /// The tile that the mouse is currently hovering over. Null if the mouse
   /// leaves the game area.
   Tile? hoveredTile;
@@ -30,25 +28,21 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
 
   @override
   void onPanUpdate(DragUpdateInfo info) {
-    /// Move the camera
-    world.cameraController.moveTo(camera.viewport.position - info.delta.global);
+    camera.pan(camera.viewport.position + info.delta.global);
   }
 
   @override
-  void onScroll(PointerScrollInfo info) {
-    /// Zoom the camera
-    world.cameraController.zoom(
-        info.scrollDelta.global.y * 0.01); // Adjust the multiplier as needed
-  }
+  void onScroll(PointerScrollInfo info) =>
+      camera.zoom(info.scrollDelta.global.y);
 
-  // TODO : Need to modify so when escape is pressed, the pause menu is shown.
   @override
   KeyEventResult onKeyEvent(
+    // ignore: deprecated_member_use
     RawKeyEvent event,
     Set<LogicalKeyboardKey> keysPressed,
   ) {
     if (keysPressed.contains(LogicalKeyboardKey.escape)) {
-      game.overlays.add(GameScreen.pauseKey);
+      overlays.add(GameScreen.settingsMenu);
       return KeyEventResult.handled;
     }
 
@@ -60,13 +54,13 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     super.onMount();
 
     /// Add the pause button to the game on top left-corner.
-    game.overlays.add(GameScreen.pauseKey);
+    overlays.add(GameScreen.pauseKey);
   }
 
   @override
   void onRemove() {
     super.onRemove();
-    game.overlays.remove(GameScreen.pauseKey);
+    overlays.remove(GameScreen.pauseKey);
   }
 
   /// Left-click handler

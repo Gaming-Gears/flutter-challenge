@@ -22,13 +22,13 @@ final class TileNotFound {
 extension _LayerTileCoordinates on TileCoordinates {
   /// Gets the [TileCoordinates] associated with a given array index.
   static TileCoordinates fromArrayIndex(int index) => TileCoordinates(
-      (index % SustainaCityWorld.mapSize) - (SustainaCityWorld.mapSize ~/ 2),
-      (index ~/ SustainaCityWorld.mapSize) - (SustainaCityWorld.mapSize ~/ 2));
+      (index % SustainaCityWorld.mapSize) - SustainaCityWorld.mapBounds,
+      (index ~/ SustainaCityWorld.mapSize) - SustainaCityWorld.mapBounds);
 
   /// Converts the coordinates to an array index for the _tiles array in [Layer]
   int toArrayIndex() =>
-      (y + SustainaCityWorld.mapSize ~/ 2) * SustainaCityWorld.mapSize +
-      (x + SustainaCityWorld.mapSize ~/ 2);
+      (y + SustainaCityWorld.mapBounds) * SustainaCityWorld.mapSize +
+      (x + SustainaCityWorld.mapBounds);
 }
 
 /// Represents a single z-axis layer of tiles.

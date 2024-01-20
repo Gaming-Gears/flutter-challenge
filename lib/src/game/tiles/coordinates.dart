@@ -21,8 +21,8 @@ final class TileCoordinates {
   TileCoordinates(this.x, this.y) {
     // Bounds checking in the constructor so we can always be sure that the
     // coordinates are valid.
-    if (x.abs() > SustainaCityWorld.mapSize ~/ 2 ||
-        y.abs() > SustainaCityWorld.mapSize ~/ 2) {
+    if (x.abs() > SustainaCityWorld.mapBounds ||
+        y.abs() > SustainaCityWorld.mapBounds) {
       throw CoordinatesOutOfBounds(x, y);
     }
   }
