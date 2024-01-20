@@ -1,6 +1,8 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 import 'game_screen.dart';
 import 'tiles/buildings/factory.dart';
@@ -21,6 +23,20 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
 
   SustainaCityGame() : super(world: SustainaCityWorld()) {
     pauseWhenBackgrounded = false;
+  }
+
+  // TODO : Need to modify so when escape is pressed, the pause menu is shown.
+  @override
+  KeyEventResult onKeyEvent(
+    RawKeyEvent event,
+    Set<LogicalKeyboardKey> keysPressed,
+  ) {
+    if (keysPressed.contains(LogicalKeyboardKey.escape)) {
+      game.overlays.add(GameScreen.pauseKey);
+      return KeyEventResult.handled;
+    }
+
+    return KeyEventResult.ignored;
   }
 
   @override

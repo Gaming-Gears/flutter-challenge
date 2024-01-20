@@ -1,3 +1,4 @@
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flame/flame.dart';
 import 'package:flutter/material.dart';
 
@@ -10,4 +11,12 @@ Future<void> main() async {
   await Flame.device.fullScreen();
   await initializeCache();
   runApp(const SustainaCityApp());
+
+  doWhenWindowReady(() {
+    const initialSize = Size(600, 450);
+    appWindow.minSize = initialSize;
+    appWindow.size = initialSize;
+    appWindow.alignment = Alignment.center;
+    appWindow.show();
+  });
 }

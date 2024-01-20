@@ -1,5 +1,8 @@
+import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nes_ui/nes_ui.dart';
+import 'package:universal_html/html.dart' as html;
 
 import '../game/game_screen.dart';
 
@@ -30,7 +33,7 @@ class MenuScreen extends StatelessWidget {
             NesButton(
               type: NesButtonType.normal,
               child: const Text('Exit'),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => kIsWeb ? html.window.close() : appWindow.close(),
             ),
           ],
         ),

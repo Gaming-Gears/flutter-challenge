@@ -7,6 +7,7 @@ environment:
 
 dependencies:
   basic_utils: ^5.7.0
+  bitsdojo_window: ^0.1.6
   flame: ^1.14.0
   flame_audio: ^0.1.0-rc5
   flame_rive: ^1.9.10
@@ -16,6 +17,7 @@ dependencies:
   logger: ^2.0.2+1
   nes_ui: ^0.13.0
   shared_preferences: ^2.2.2
+  universal_html: ^2.2.4
 
 dev_dependencies:
   flutter_test:
