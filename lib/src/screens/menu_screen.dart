@@ -1,8 +1,7 @@
-import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:nes_ui/nes_ui.dart';
 
-import '../game/game.dart';
+import '../game/game_screen.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
@@ -25,9 +24,7 @@ class MenuScreen extends StatelessWidget {
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => GameWidget(
-                    game: SustainaCityGame(),
-                  ),
+                  builder: (context) => const GameScreen(),
                 ),
               ),
             ),

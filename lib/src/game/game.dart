@@ -1,19 +1,40 @@
+import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 
+import 'game_screen.dart';
 import 'tiles/buildings/factory.dart';
 import 'tiles/coordinates.dart';
 import 'tiles/tile.dart';
 import 'world.dart';
 
 final class SustainaCityGame extends FlameGame<SustainaCityWorld>
-    with SingleGameInstance, TapDetector, SecondaryTapDetector {
+    with
+        SingleGameInstance,
+        TapDetector,
+        SecondaryTapDetector,
+        KeyboardEvents,
+        HasGameReference {
   /// The tile that the mouse is currently hovering over. Null if the mouse
   /// leaves the game area.
   Tile? hoveredTile;
 
   SustainaCityGame() : super(world: SustainaCityWorld()) {
     pauseWhenBackgrounded = false;
+  }
+
+  @override
+  void onMount() {
+    super.onMount();
+
+    /// Add the pause button to the game on top left-corner.
+    game.overlays.add(GameScreen.pauseKey);
+  }
+
+  @override
+  void onRemove() {
+    super.onRemove();
+    game.overlays.remove(GameScreen.pauseKey);
   }
 
   /// Left-click handler
