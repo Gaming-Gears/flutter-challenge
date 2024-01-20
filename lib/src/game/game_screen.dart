@@ -1,7 +1,7 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
-import '../components/setting_button.dart';
+import '../components/pause_button.dart';
 import 'game.dart';
 
 class GameScreen extends StatelessWidget {
@@ -15,7 +15,10 @@ class GameScreen extends StatelessWidget {
       body: GameWidget(
         game: SustainaCityGame(),
         overlayBuilderMap: {
-          pauseKey: (context, game) => const SettingsButton(),
+          pauseKey: (context, game) => const Padding(
+                padding: EdgeInsets.all(10.0),
+                child: PauseButton(),
+              ),
         },
       ),
     );

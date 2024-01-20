@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nes_ui/nes_ui.dart';
 
-class SettingsButton extends StatelessWidget {
-  const SettingsButton({super.key});
+class PauseButton extends StatelessWidget {
+  const PauseButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.settings),
+    return NesButton(
+      type: NesButtonType.normal,
+      child: SvgPicture.asset('icons/pause.svg'),
       onPressed: () => NesDialog.show(
         context: context,
         builder: (_) => Column(
