@@ -6,6 +6,11 @@ class CameraController {
 
   CameraController(this.worldBounds);
 
+  /// Clamps the zoom to the range [0.05, 3.0].
+  void clampZoom() {
+    camera.viewfinder.zoom = camera.viewfinder.zoom.clamp(0.05, 3.0);
+  }
+
   /// Attaches the camera to the game.
   void attachCamera(CameraComponent camera) {
     this.camera = camera;
