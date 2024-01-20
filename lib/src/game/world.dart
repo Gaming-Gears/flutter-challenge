@@ -32,6 +32,7 @@ final class SustainaCityWorld extends World with HasGameRef<SustainaCityGame> {
   /// The amount of money the player has.
   double money = initialMoney;
 
+  /// The camera controller attached to the game.
   late CameraController cameraController;
 
   SustainaCityWorld() : super();
@@ -40,9 +41,14 @@ final class SustainaCityWorld extends World with HasGameRef<SustainaCityGame> {
   FutureOr<void> onLoad() async {
     await add(groundLayer);
     await add(buildingLayer);
-    final Vector2 worldBounds =
-        Vector2(1000, 1000); // Example size we should change
+
+    /// example for bounds we need to change to map size in the future
+    final Vector2 worldBounds = Vector2(6400, 6400);
+
+    /// Initialize the camera controller
     cameraController = CameraController(worldBounds);
+
+    /// Attach the camera to the game
     cameraController.attachCamera(game.camera);
     return super.onLoad();
   }
