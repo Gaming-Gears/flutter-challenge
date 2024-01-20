@@ -23,9 +23,8 @@ class MenuScreen extends StatelessWidget {
               child: const Text('Start Game'),
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const GameScreen(),
-                ),
+                NesVerticalGridTransition.route<void>(
+                    pageBuilder: (_, __, ___) => const GameScreen()),
               ),
             ),
             NesButton(
