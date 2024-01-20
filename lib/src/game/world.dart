@@ -43,7 +43,8 @@ final class SustainaCityWorld extends World with HasGameRef<SustainaCityGame> {
     await add(buildingLayer);
 
     /// example for bounds we need to change to map size in the future
-    final Vector2 worldBounds = Vector2(6400, 6400);
+
+    final Vector2 worldBounds = game.size;
 
     /// Initialize the camera controller
     cameraController = CameraController(worldBounds);
