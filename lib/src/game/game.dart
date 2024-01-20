@@ -1,9 +1,13 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
+import 'camera_controls.dart';
 import 'game_screen.dart';
 import 'tiles/buildings/factory.dart';
 import 'tiles/coordinates.dart';
@@ -16,6 +20,9 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
         TapDetector,
         SecondaryTapDetector,
         KeyboardEvents,
+        PanDetector,
+        ScaleDetector,
+        ScrollDetector,
         HasGameReference {
   /// The tile that the mouse is currently hovering over. Null if the mouse
   /// leaves the game area.
@@ -23,6 +30,27 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
 
   SustainaCityGame() : super(world: SustainaCityWorld()) {
     pauseWhenBackgrounded = false;
+  }
+  @override
+  FutureOr<void> onLoad() {
+    // TODO: implement onLoad
+
+    final Vector2 worldBounds =
+        Vector2(3000, 3000); // Example size we should change
+    world.cameraController = CameraController(worldBounds);
+    world.cameraController.attachCamera(camera);
+  }
+
+  @override
+  void onPanUpdate(DragUpdateInfo info) {
+    log(info.toString(), name: 'Panning');
+    world.cameraController.moveTo(camera.viewport.position - info.delta.global);
+  }
+
+  @override
+  void onScroll(PointerScrollInfo info) {
+    world.cameraController.zoom(
+        info.scrollDelta.global.y * 0.01); // Adjust the multiplier as needed
   }
 
   // TODO : Need to modify so when escape is pressed, the pause menu is shown.

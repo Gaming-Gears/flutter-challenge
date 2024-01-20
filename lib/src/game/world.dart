@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flame/components.dart';
 
 import '../logger.dart';
+import 'camera_controls.dart';
 import 'game.dart';
 import 'tiles/buildings/building.dart';
 import 'tiles/coordinates.dart';
@@ -31,12 +32,18 @@ final class SustainaCityWorld extends World with HasGameRef<SustainaCityGame> {
   /// The amount of money the player has.
   double money = initialMoney;
 
+  late CameraController cameraController;
+
   SustainaCityWorld() : super();
 
   @override
   FutureOr<void> onLoad() async {
     await add(groundLayer);
     await add(buildingLayer);
+    final Vector2 worldBounds =
+        Vector2(1000, 1000); // Example size we should change
+    cameraController = CameraController(worldBounds);
+    cameraController.attachCamera(game.camera);
     return super.onLoad();
   }
 
