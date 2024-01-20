@@ -65,7 +65,7 @@ final class Layer<T extends Tile> extends Component
   T? get(TileCoordinates coordinates) => _tiles[coordinates.toArrayIndex()];
 
   /// Removes the tile at the given coordinates.
-  void removeTile(TileCoordinates coordinates) {
+  T removeTile(TileCoordinates coordinates) {
     final oldTile = get(coordinates);
     if (oldTile == null) {
       throw TileNotFound(coordinates);
@@ -78,6 +78,7 @@ final class Layer<T extends Tile> extends Component
         }
       });
       remove(oldTile);
+      return oldTile;
     }
   }
 

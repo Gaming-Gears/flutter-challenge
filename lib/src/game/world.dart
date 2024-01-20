@@ -11,7 +11,11 @@ import 'tiles/layer.dart';
 
 final class SustainaCityWorld extends World with HasGameRef<SustainaCityGame> {
   /// The width/height of the map (measured in units).
-  static const mapSize = 21;
+  static const mapSize = 20;
+
+  static const moneyRate = 3.0;
+  static const initialMoney = 100.0;
+  static const destroyRefund = 0.8;
 
   /// This layer houses all the ground tiles.
   final groundLayer = Layer((coordinates) => Grass(coordinates));
@@ -20,7 +24,7 @@ final class SustainaCityWorld extends World with HasGameRef<SustainaCityGame> {
   final buildingLayer = Layer<Building>((_) => null);
 
   /// The amount of money the player has.
-  double money = 0;
+  double money = initialMoney;
 
   SustainaCityWorld() : super();
 
@@ -31,12 +35,23 @@ final class SustainaCityWorld extends World with HasGameRef<SustainaCityGame> {
     return super.onLoad();
   }
 
+  @override
+  void update(double dt) {
+    money += moneyRate * dt;
+    super.update(dt);
+  }
+
   void build(Building tile) {
     try {
-      buildingLayer.setTile(tile);
-      gameRef.hoveredTile?.unhighlight();
-      gameRef.hoveredTile = tile;
-      tile.highlight();
+      if (money < tile.price) {
+        error('Need \$${tile.price}, but only have \$$money');
+      } else {
+        buildingLayer.setTile(tile);
+        gameRef.hoveredTile?.unhighlight();
+        gameRef.hoveredTile = tile;
+        tile.highlight();
+        money -= tile.price;
+      }
     } on TileAlreadyExists catch (e) {
       error(e.toString());
     } on CoordinatesOutOfBounds catch (e) {
@@ -47,11 +62,12 @@ final class SustainaCityWorld extends World with HasGameRef<SustainaCityGame> {
   void destroy(
       TileCoordinates coordinates, TileCoordinates newMouseCoordinates) {
     try {
-      buildingLayer.removeTile(coordinates);
+      final oldBuilding = buildingLayer.removeTile(coordinates);
       gameRef.hoveredTile = groundLayer.get(newMouseCoordinates);
       if (gameRef.hoveredTile != null) {
         gameRef.hoveredTile!.highlight();
       }
+      money += oldBuilding.price * destroyRefund;
     } on TileNotFound catch (e) {
       error(e.toString());
     }
