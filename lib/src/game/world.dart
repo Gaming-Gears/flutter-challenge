@@ -13,8 +13,13 @@ final class SustainaCityWorld extends World with HasGameRef<SustainaCityGame> {
   /// The width/height of the map (measured in units).
   static const mapSize = 20;
 
+  /// The amount of money the player earns per second.
   static const moneyRate = 3.0;
+
+  /// The amount of money the player starts with.
   static const initialMoney = 100.0;
+
+  /// The percentage the player gets back when destroying a building.
   static const destroyRefund = 0.8;
 
   /// This layer houses all the ground tiles.
@@ -42,34 +47,33 @@ final class SustainaCityWorld extends World with HasGameRef<SustainaCityGame> {
   }
 
   void build(Building tile) {
-    try {
-      if (money < tile.price) {
-        error('Need \$${tile.price}, but only have \$$money');
-      } else {
-        buildingLayer.setTile(tile);
+    if (money < tile.price) {
+      error('Need \$${tile.price}, but only have \$$money');
+    } else {
+      bool built = false;
+      try {
+        built = buildingLayer.setTile(tile);
+      } on CoordinatesOutOfBounds catch (e) {
+        error(e.toString());
+      }
+      if (built) {
         gameRef.hoveredTile?.unhighlight();
         gameRef.hoveredTile = tile;
         tile.highlight();
         money -= tile.price;
       }
-    } on TileAlreadyExists catch (e) {
-      error(e.toString());
-    } on CoordinatesOutOfBounds catch (e) {
-      error(e.toString());
     }
   }
 
   void destroy(
       TileCoordinates coordinates, TileCoordinates newMouseCoordinates) {
-    try {
-      final oldBuilding = buildingLayer.removeTile(coordinates);
+    final oldBuilding = buildingLayer.removeTile(coordinates);
+    if (oldBuilding != null) {
       gameRef.hoveredTile = groundLayer.get(newMouseCoordinates);
       if (gameRef.hoveredTile != null) {
         gameRef.hoveredTile!.highlight();
       }
       money += oldBuilding.price * destroyRefund;
-    } on TileNotFound catch (e) {
-      error(e.toString());
     }
   }
 }

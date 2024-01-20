@@ -52,11 +52,21 @@ abstract base class Tile extends SpriteComponent
   /// The height (measured in units) of the sprite
   int get tileHeight;
 
-  /// Iterate through each unit in the [Tile], calling [callback] on each one
-  void forEachUnit(void Function(TileCoordinates coordinates) callback) {
+  /// Iterate through each unit in the [Tile], calling [callback] on each one.
+  void forEachUnit(
+      void Function(
+        TileCoordinates coordinates,
+        VoidCallback breakLoop,
+      ) callback) {
+    bool breakLoop = false;
+    void breakLoopCallback() => breakLoop = true;
+
     for (int x = coordinates.x; x < coordinates.x + tileWidth; x++) {
       for (int y = coordinates.y; y < coordinates.y + tileHeight; y++) {
-        callback(TileCoordinates(x, y));
+        callback(TileCoordinates(x, y), breakLoopCallback);
+        if (breakLoop) {
+          return;
+        }
       }
     }
   }
