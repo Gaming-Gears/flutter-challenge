@@ -1,9 +1,7 @@
-import 'dart:math';
-
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 
-import 'tiles/buildings/house.dart';
+import 'tiles/buildings/factory.dart';
 import 'tiles/coordinates.dart';
 import 'tiles/tile.dart';
 import 'world.dart';
@@ -22,8 +20,7 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   @override
   void onTapUp(TapUpInfo info) {
     if (hoveredTile != null) {
-      world.build(House(hoveredTile!.coordinates,
-          Model.values[Random().nextInt(Model.values.length)]));
+      world.build(Factory(hoveredTile!.coordinates));
     }
     super.onTapUp(info);
   }

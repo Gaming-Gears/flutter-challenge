@@ -11,7 +11,7 @@ import 'tiles/layer.dart';
 
 final class SustainaCityWorld extends World with HasGameRef<SustainaCityGame> {
   /// The width/height of the map (measured in units).
-  static const mapSize = 20;
+  static const mapSize = 100;
 
   /// The amount of money the player earns per second.
   static const moneyRate = 3.0;
