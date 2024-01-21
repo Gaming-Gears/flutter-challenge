@@ -10,12 +10,10 @@ Future<void> showSettingsMenu(
   BuildContext context,
   SustainaCityGame game,
 ) async {
-  game.pauseEngine();
   await NesDialog.show<void>(
     context: context,
     builder: (_) => const SettingsMenu(),
   );
-  game.resumeEngine();
 }
 
 final class SettingsMenu extends StatelessWidget {

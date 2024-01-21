@@ -19,7 +19,7 @@ final class TileNotFound {
   String toString() => 'No tile at $coordinates';
 }
 
-extension _LayerTileCoordinates on TileCoordinates {
+extension LayerTileCoordinates on TileCoordinates {
   /// Gets the [TileCoordinates] associated with a given array index.
   static TileCoordinates fromArrayIndex(int index) => TileCoordinates(
       (index % SustainaCityWorld.mapSize) - SustainaCityWorld.mapBounds,
@@ -31,21 +31,48 @@ extension _LayerTileCoordinates on TileCoordinates {
       (x + SustainaCityWorld.mapBounds);
 }
 
+final tileToLayer = <Type, Layer>{};
+
+/// Thrown when a layer is not found for a given tile type.
+final class LayerNotFound implements Exception {
+  final Type type;
+
+  const LayerNotFound(this.type) : super();
+
+  @override
+  String toString() => 'No layer found for $type';
+}
+
+/// Thrown when a tile is placed on an incorrect layer.
+final class IncorrectLayerType implements Exception {
+  final Type type;
+  final Type incorrect;
+  final Type correct;
+
+  const IncorrectLayerType(this.type, this.incorrect, this.correct) : super();
+
+  @override
+  String toString() =>
+      'Incorrect layer for $type: $incorrect, correct layer was: $correct';
+}
+
 /// Represents a single z-axis layer of tiles.
-final class Layer<T extends Tile> extends Component
+final class Layer<T extends Tile<T>> extends Component
     with HasGameRef<SustainaCityGame> {
-  final List<T?> _tiles;
+  late final List<T?> tiles;
 
   /// Creates a new layer, calling [tileGenerator] to populate each tile.
-  Layer(T? Function(TileCoordinates) tileGenerator)
-      : _tiles = List.generate(
-            SustainaCityWorld.mapSize * SustainaCityWorld.mapSize,
-            (index) =>
-                tileGenerator(_LayerTileCoordinates.fromArrayIndex(index)));
+  Layer(T? Function(TileCoordinates coordinates) tileGenerator,
+      {required super.priority})
+      : super() {
+    tileToLayer[T] = this;
+    tiles = List.generate(SustainaCityWorld.mapSize * SustainaCityWorld.mapSize,
+        (index) => tileGenerator(LayerTileCoordinates.fromArrayIndex(index)));
+  }
 
   @override
   FutureOr<void> onLoad() async {
-    for (final tile in _tiles) {
+    for (final tile in tiles) {
       if (tile != null) {
         await add(tile);
       }
@@ -54,28 +81,12 @@ final class Layer<T extends Tile> extends Component
   }
 
   /// Returns the tile at the given coordinates.
-  T? get(TileCoordinates coordinates) => _tiles[coordinates.toArrayIndex()];
+  T? get(TileCoordinates coordinates) => tiles[coordinates.toArrayIndex()];
 
   /// Removes and returns the tile at the given coordinates. Returns null if no
   /// tile was found.
-  T? removeTile(TileCoordinates coordinates) {
-    final oldTile = get(coordinates);
-    if (oldTile == null) {
-      return null;
-    } else {
-      oldTile.forEachUnit((coordinates, _) {
-        if (get(coordinates) == null) {
-          // This should only happen if the dimensions of the tile are somehow
-          // invalid.
-          throw TileNotFound(coordinates);
-        } else {
-          _tiles[coordinates.toArrayIndex()] = null;
-        }
-      });
-      remove(oldTile);
-      return oldTile;
-    }
-  }
+  T? removeTile(TileCoordinates coordinates) =>
+      get(coordinates)?..removeFromLayer();
 
   /// Sets the tile at the given coordinates. Returns true if the tile was
   /// successfully set, false otherwise.
@@ -105,7 +116,7 @@ final class Layer<T extends Tile> extends Component
     if (!overlaps) {
       // Once we know that the new tile is valid, add it to the layer.
       tile.forEachUnit(
-          (coordinates, _) => _tiles[coordinates.toArrayIndex()] = tile);
+          (coordinates, _) => tiles[coordinates.toArrayIndex()] = tile);
 
       // Add the tile to the flame component list.
       add(tile);

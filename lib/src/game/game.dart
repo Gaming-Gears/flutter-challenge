@@ -23,7 +23,7 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
         ScrollDetector {
   /// The tile that the mouse is currently hovering over. Null if the mouse
   /// leaves the game area.
-  Tile? hoveredTile;
+  Tile<Object?>? hoveredTile;
 
   /// The tile that is currently selected to be placed on the map.
   ActiveTile activeTile = ActiveTile.factory;
@@ -32,10 +32,21 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     pauseWhenBackgrounded = false;
   }
 
-  @override
-  void onPanUpdate(DragUpdateInfo info) {
-    camera.pan(camera.viewport.position + info.delta.global);
+  /// Converts screen coordinates (with pan/zoom) to tile coordinates
+  TileCoordinates fromScreenCoordinates(Vector2 screenCoordinates) {
+    final tileCoordinatesVector = screenCoordinates.clone()
+      ..sub(canvasSize.scaled(0.5))
+      ..sub(camera.viewport.position)
+      ..scale(1 / (camera.viewfinder.zoom * Tile.unitSize));
+    return TileCoordinates(
+      tileCoordinatesVector.x.floor(),
+      tileCoordinatesVector.y.floor(),
+    );
   }
+
+  @override
+  void onPanUpdate(DragUpdateInfo info) =>
+      camera.pan(camera.viewport.position + info.delta.global);
 
   @override
   void onScroll(PointerScrollInfo info) =>
@@ -96,11 +107,9 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   void onSecondaryTapUp(TapUpInfo info) {
     if (hoveredTile != null) {
       world.destroy(
-          hoveredTile!.coordinates,
-          TileCoordinates(
-            (info.eventPosition.global.x - 0.5 * canvasSize.x) ~/ Tile.unitSize,
-            (info.eventPosition.global.y - 0.5 * canvasSize.y) ~/ Tile.unitSize,
-          ));
+        hoveredTile!.coordinates,
+        fromScreenCoordinates(info.eventPosition.global),
+      );
     }
     super.onSecondaryTapUp(info);
   }

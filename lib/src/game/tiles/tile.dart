@@ -8,9 +8,10 @@ import 'package:flutter/painting.dart';
 
 import '../game.dart';
 import 'coordinates.dart';
+import 'layer.dart';
 
 /// The "MOTHER OF ALL TILES"
-abstract base class Tile extends SpriteComponent
+abstract base class Tile<T extends Tile<T>> extends SpriteComponent
     with HoverCallbacks, TapCallbacks, HasGameRef<SustainaCityGame> {
   /// Pixel size of a single unit
   static const unitSize = 32.0;
@@ -24,17 +25,29 @@ abstract base class Tile extends SpriteComponent
   /// The coordinates of the tile
   final TileCoordinates coordinates;
 
+  /// The layer this tile is on
+  late final Layer<T> layer;
+
   /// Priority is the z-index of the tile. Higher priority tiles are drawn on
   /// top of lower priority tiles.
-  Tile(this.coordinates, {required int priority})
+  Tile(this.coordinates)
       : super(
-          priority: priority,
           position: Vector2(
             coordinates.x * unitSize,
             coordinates.y * unitSize,
           ),
         ) {
     paint.isAntiAlias = false;
+    final Layer<Tile<dynamic>>? tileLayer = tileToLayer[T];
+    if (tileLayer == null) {
+      throw LayerNotFound(T);
+    }
+    if (tileLayer is Layer<T>) {
+      layer = tileLayer;
+      priority = layer.priority;
+    } else {
+      throw IncorrectLayerType(T, tileLayer.runtimeType, Layer<T>);
+    }
   }
 
   /// The path to the sprite sheet
@@ -69,6 +82,20 @@ abstract base class Tile extends SpriteComponent
         }
       }
     }
+  }
+
+  /// Removes this tile from the layer it is on.
+  void removeFromLayer() {
+    forEachUnit((coordinates, _) {
+      if (layer.get(coordinates) == null) {
+        // This should only happen if the dimensions of the tile are somehow
+        // invalid.
+        throw TileNotFound(coordinates);
+      } else {
+        layer.tiles[coordinates.toArrayIndex()] = null;
+      }
+    });
+    layer.remove(this);
   }
 
   @override
