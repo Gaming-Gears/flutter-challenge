@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nes_ui/nes_ui.dart';
 
 import '../game/game.dart';
@@ -15,7 +14,11 @@ class PauseButton extends StatelessWidget {
         padding: const EdgeInsets.all(10.0),
         child: NesButton(
           type: NesButtonType.normal,
-          child: SvgPicture.asset('icons/pause.svg'),
+          child: Image.asset(
+            'assets/icons/pause.png',
+            height: 20,
+            width: 20,
+          ),
           onPressed: () => showSettingsMenu(context, game),
         ),
       );
