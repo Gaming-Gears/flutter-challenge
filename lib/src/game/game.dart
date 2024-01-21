@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../screens/game_screen.dart';
 import 'camera_controls.dart';
 import 'tiles/buildings/factory.dart';
+import 'tiles/buildings/house.dart';
 import 'tiles/coordinates.dart';
 import 'tiles/tile.dart';
 import 'world.dart';
@@ -23,6 +24,9 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   /// The tile that the mouse is currently hovering over. Null if the mouse
   /// leaves the game area.
   Tile? hoveredTile;
+
+  /// The tile that is currently selected to be placed on the map.
+  ActiveTile activeTile = ActiveTile.factory;
 
   SustainaCityGame() : super(world: SustainaCityWorld()) {
     pauseWhenBackgrounded = false;
@@ -45,10 +49,16 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   ) {
     if (keysPressed.contains(LogicalKeyboardKey.escape)) {
       overlays.add(GameScreen.settingsMenu);
-      return KeyEventResult.handled;
+    } else if (keysPressed.contains(LogicalKeyboardKey.digit1)) {
+      activeTile = ActiveTile.factory;
+    } else if (keysPressed.contains(LogicalKeyboardKey.digit2)) {
+      activeTile = ActiveTile.smallHouse;
+    } else if (keysPressed.contains(LogicalKeyboardKey.digit3)) {
+      activeTile = ActiveTile.largeHouse;
+    } else {
+      return KeyEventResult.ignored;
     }
-
-    return KeyEventResult.ignored;
+    return KeyEventResult.handled;
   }
 
   @override
@@ -69,7 +79,14 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   @override
   void onTapUp(TapUpInfo info) {
     if (hoveredTile != null) {
-      world.build(Factory(hoveredTile!.coordinates));
+      final coords = hoveredTile!.coordinates;
+      world.build(
+        switch (activeTile) {
+          ActiveTile.factory => Factory(coords),
+          ActiveTile.smallHouse => SmallHouse(coords),
+          ActiveTile.largeHouse => LargeHouse(coords),
+        },
+      );
     }
     super.onTapUp(info);
   }

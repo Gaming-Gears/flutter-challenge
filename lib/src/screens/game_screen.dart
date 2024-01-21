@@ -1,9 +1,9 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
+import '../game/game.dart';
 import '../widgets/pause_button.dart';
 import '../widgets/settings_menu.dart';
-import '../game/game.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});

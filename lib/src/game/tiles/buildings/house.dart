@@ -1,7 +1,12 @@
 import 'building.dart';
+import 'factory.dart';
 
 abstract base class House extends Building {
+  Factory? powerSource;
+
   House(super.coordinates) : super();
+
+  double get powerConsumption;
 }
 
 final class SmallHouse extends House {
@@ -24,6 +29,9 @@ final class SmallHouse extends House {
 
   @override
   double get price => 100;
+
+  @override
+  double get powerConsumption => 1;
 }
 
 final class LargeHouse extends House {
@@ -46,4 +54,7 @@ final class LargeHouse extends House {
 
   @override
   double get price => 200;
+
+  @override
+  double get powerConsumption => 2;
 }
