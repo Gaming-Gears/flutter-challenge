@@ -14,7 +14,6 @@ Future<void> showSettingsMenu(
   await StyledDialog.show<void>(
     context: context,
     builder: (_) => const SettingsMenu(),
-    onPressedClose: () => game.resumeEngine(),
   );
 }
 
