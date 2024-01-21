@@ -6,7 +6,6 @@ import 'package:flame/extensions.dart';
 import 'package:flame/flame.dart';
 import 'package:flutter/painting.dart';
 
-import '../game.dart';
 import '../world.dart';
 import 'coordinates.dart';
 import 'layer.dart';
@@ -38,11 +37,7 @@ final class IncorrectLayerType implements Exception {
 
 /// The "MOTHER OF ALL TILES"
 abstract base class Tile<T extends Tile<T>> extends SpriteComponent
-    with
-        HoverCallbacks,
-        TapCallbacks,
-        HasGameRef<SustainaCityGame>,
-        HasWorldReference<SustainaCityWorld> {
+    with HoverCallbacks, TapCallbacks, HasWorldReference<SustainaCityWorld> {
   /// Pixel size of a single unit
   static const unitSize = 32.0;
 
@@ -156,15 +151,15 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
 
   @override
   void onHoverEnter() {
-    final currentlyHovered = game.hoveredTile;
+    final currentlyHovered = world.hoveredTile;
     if (
         // If no tile is currently hovered over, highlight this tile
         currentlyHovered == null ||
-            // If this tile has a higher priority than the currently
-            // hovered tile, highlight this tile
-            currentlyHovered.priority <= priority ||
-            // If this tile is not contained within the currently hovered
+            // If this tile has a higher priority than the currently hovered
             // tile, highlight this tile
+            currentlyHovered.priority <= priority ||
+            // If this tile is not contained within the currently hovered tile,
+            // highlight this tile
             !Rect.fromLTWH(
                     currentlyHovered.coordinates.x.toDouble(),
                     currentlyHovered.coordinates.y.toDouble(),
@@ -173,16 +168,16 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
                 .contains(Offset(
                     coordinates.x.toDouble(), coordinates.y.toDouble()))) {
       currentlyHovered?.unhighlight();
-      game.hoveredTile = this;
+      world.hoveredTile = this;
       highlight();
     }
   }
 
   @override
   void onHoverExit() {
-    if (game.hoveredTile == this) {
-      game.hoveredTile = null;
+    if (!isRemoved && world.hoveredTile == this) {
       unhighlight();
+      world.hoveredTile = null;
     }
   }
 }

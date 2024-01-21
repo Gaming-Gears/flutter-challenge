@@ -1,12 +1,13 @@
+import 'dart:async';
+
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 import '../screens/game_screen.dart';
+import 'build_mode/build_mode.dart';
 import 'camera_controls.dart';
-import 'tiles/buildings/factory.dart';
-import 'tiles/buildings/house.dart';
 import 'tiles/coordinates.dart';
 import 'tiles/tile.dart';
 import 'world.dart';
@@ -21,19 +22,21 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
         KeyboardEvents,
         PanDetector,
         ScrollDetector {
-  /// The tile that the mouse is currently hovering over. Null if the mouse
-  /// leaves the game area.
-  Tile<Object?>? hoveredTile;
-
-  /// The tile that is currently selected to be placed on the map.
-  ActiveTile activeTile = ActiveTile.factory;
+  /// The current build mode. This determines what happens when the players taps
+  late BuildMode _buildMode;
 
   SustainaCityGame() : super(world: SustainaCityWorld()) {
     pauseWhenBackgrounded = false;
   }
 
+  @override
+  FutureOr<void> onLoad() async {
+    _buildMode = BuildingBuildMode(CurrentBuilding.smallHouse, world);
+    return await super.onLoad();
+  }
+
   /// Converts screen coordinates (with pan/zoom) to tile coordinates
-  TileCoordinates fromScreenCoordinates(Vector2 screenCoordinates) {
+  TileCoordinates _fromScreenCoordinates(Vector2 screenCoordinates) {
     final tileCoordinatesVector = screenCoordinates.clone()
       ..sub(canvasSize.scaled(0.5))
       ..sub(camera.viewport.position)
@@ -61,11 +64,13 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     if (keysPressed.contains(LogicalKeyboardKey.escape)) {
       overlays.add(GameScreen.settingsMenu);
     } else if (keysPressed.contains(LogicalKeyboardKey.digit1)) {
-      activeTile = ActiveTile.factory;
+      _buildMode = BuildingBuildMode(CurrentBuilding.factory, world);
     } else if (keysPressed.contains(LogicalKeyboardKey.digit2)) {
-      activeTile = ActiveTile.smallHouse;
+      _buildMode = BuildingBuildMode(CurrentBuilding.smallHouse, world);
     } else if (keysPressed.contains(LogicalKeyboardKey.digit3)) {
-      activeTile = ActiveTile.largeHouse;
+      _buildMode = BuildingBuildMode(CurrentBuilding.largeHouse, world);
+    } else if (keysPressed.contains(LogicalKeyboardKey.digit4)) {
+      _buildMode = WireBuildMode(world);
     } else {
       return KeyEventResult.ignored;
     }
@@ -89,28 +94,14 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   /// Left-click handler
   @override
   void onTapUp(TapUpInfo info) {
-    if (hoveredTile != null) {
-      final coords = hoveredTile!.coordinates;
-      world.build(
-        switch (activeTile) {
-          ActiveTile.factory => Factory(coords),
-          ActiveTile.smallHouse => SmallHouse(coords),
-          ActiveTile.largeHouse => LargeHouse(coords),
-        },
-      );
-    }
+    _buildMode.build(_fromScreenCoordinates(info.eventPosition.global));
     super.onTapUp(info);
   }
 
   /// Right-click handler
   @override
   void onSecondaryTapUp(TapUpInfo info) {
-    if (hoveredTile != null) {
-      world.destroy(
-        hoveredTile!.coordinates,
-        fromScreenCoordinates(info.eventPosition.global),
-      );
-    }
+    _buildMode.destroy(_fromScreenCoordinates(info.eventPosition.global));
     super.onSecondaryTapUp(info);
   }
 }

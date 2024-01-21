@@ -71,8 +71,10 @@ final class Layer<T extends Tile<T>> extends Component
     try {
       tile.forEachUnit(
         (coordinates, breakLoop) {
-          if (get(coordinates) != null) {
-            error('Tried to build at $coordinates but tile already exists');
+          final existingTile = get(coordinates);
+          if (existingTile != null) {
+            error('Tried to build at $coordinates but tile already exists, '
+                'existing tile: $existingTile');
             overlaps = true;
             breakLoop();
           }
