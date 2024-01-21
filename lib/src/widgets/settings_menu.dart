@@ -5,14 +5,16 @@ import 'package:nes_ui/nes_ui.dart';
 
 import '../game/game.dart';
 import '../screens/game_screen.dart';
+import 'dialog_box.dart';
 
 Future<void> showSettingsMenu(
   BuildContext context,
   SustainaCityGame game,
 ) async {
-  await NesDialog.show<void>(
+  await StyledDialog.show<void>(
     context: context,
     builder: (_) => const SettingsMenu(),
+    onPressedClose: () => game.resumeEngine(),
   );
 }
 
