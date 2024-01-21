@@ -10,7 +10,7 @@ import 'tiles/tile.dart';
 
 final class SustainaCityWorld extends World {
   /// The width/height of the map (measured in units).
-  static const mapSize = 100;
+  static const mapSize = 40;
 
   /// The bounds of the map in the tile coordinate system (measured in units).
   static const mapBounds = mapSize ~/ 2;

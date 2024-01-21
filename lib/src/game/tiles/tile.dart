@@ -4,7 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/flame.dart';
-import 'package:flutter/painting.dart';
+import 'package:flutter/material.dart';
 
 import '../world.dart';
 import 'coordinates.dart';
@@ -42,10 +42,7 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
   static const unitSize = 32.0;
 
   /// The tint of the sprite when hovered over
-  static const hoverColor = Color.fromARGB(255, 251, 219, 67);
-
-  /// The opacity of the tint of the sprite when hovered over
-  static const hoverOpacity = 0.2;
+  static const hoverColor = Color.fromARGB(51, 251, 219, 67);
 
   /// The coordinates of the tile
   final TileCoordinates coordinates;
@@ -53,8 +50,6 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
   /// The layer this tile is on
   late final Layer<T> layer;
 
-  /// Priority is the z-index of the tile. Higher priority tiles are drawn on
-  /// top of lower priority tiles.
   Tile(this.coordinates)
       : super(
           position: Vector2(
@@ -67,7 +62,7 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
 
   @override
   FutureOr<void> onLoad() async {
-    // get the layer corresponding to this tile type
+    // Get the layer corresponding to this tile type
     final Layer<Tile<dynamic>>? tileLayer = world.tileToLayer[T];
     if (tileLayer == null) {
       throw LayerNotFound(
@@ -89,6 +84,9 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
       srcPosition:
           Vector2(srcTileOffsetX * unitSize, srcTileOffsetY * unitSize),
     );
+
+    // Fixes anti-aliasing issues on web
+    unhighlight();
 
     return await super.onLoad();
   }
@@ -142,12 +140,12 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
   }
 
   /// Tints the sprite to [hoverColor]
-  void highlight() => paint.colorFilter =
-      ColorFilter.mode(hoverColor.withOpacity(hoverOpacity), BlendMode.srcATop);
+  void highlight() =>
+      paint.colorFilter = const ColorFilter.mode(hoverColor, BlendMode.srcATop);
 
   /// Removes the tint from the sprite
   void unhighlight() => paint.colorFilter =
-      ColorFilter.mode(hoverColor.withOpacity(0), BlendMode.srcATop);
+      const ColorFilter.mode(Colors.transparent, BlendMode.srcATop);
 
   @override
   void onHoverEnter() {

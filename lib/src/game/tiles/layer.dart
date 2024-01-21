@@ -36,7 +36,7 @@ final class Layer<T extends Tile<T>> extends Component
   final T? Function(TileCoordinates coordinates) initialTileGenerator;
   late final List<T?> tiles;
 
-  /// Creates a new layer, calling [tileGenerator] to populate each tile.
+  /// Creates a new layer, calling [initialTileGenerator] to populate each tile.
   Layer(this.initialTileGenerator, {required super.priority}) : super();
 
   @override

@@ -4,7 +4,7 @@ import 'world.dart';
 
 extension CameraControls on CameraComponent {
   static const maxZoom = 3.0;
-  static const minZoom = 0.05;
+  static const minZoom = 0.5;
   static const zoomSpeed = 0.003;
 
   /// Clamps the camera position to the bounds of the map.

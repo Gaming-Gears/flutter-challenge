@@ -12,8 +12,6 @@ import 'tiles/coordinates.dart';
 import 'tiles/tile.dart';
 import 'world.dart';
 
-enum ActiveTile { factory, smallHouse, largeHouse }
-
 final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     with
         SingleGameInstance,
@@ -61,20 +59,23 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     RawKeyEvent event,
     Set<LogicalKeyboardKey> keysPressed,
   ) {
-    if (keysPressed.contains(LogicalKeyboardKey.escape)) {
-      overlays.add(GameScreen.settingsMenu);
-    } else if (keysPressed.contains(LogicalKeyboardKey.digit1)) {
-      _buildMode = BuildingBuildMode(CurrentBuilding.factory, world);
-    } else if (keysPressed.contains(LogicalKeyboardKey.digit2)) {
-      _buildMode = BuildingBuildMode(CurrentBuilding.smallHouse, world);
-    } else if (keysPressed.contains(LogicalKeyboardKey.digit3)) {
-      _buildMode = BuildingBuildMode(CurrentBuilding.largeHouse, world);
-    } else if (keysPressed.contains(LogicalKeyboardKey.digit4)) {
-      _buildMode = WireBuildMode(world);
-    } else {
-      return KeyEventResult.ignored;
+    for (final key in keysPressed) {
+      switch (key) {
+        case LogicalKeyboardKey.escape:
+          overlays.add(GameScreen.pauseKey);
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.digit1:
+          _buildMode = BuildingBuildMode(CurrentBuilding.smallHouse, world);
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.digit2:
+          _buildMode = BuildingBuildMode(CurrentBuilding.largeHouse, world);
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.digit3:
+          _buildMode = BuildingBuildMode(CurrentBuilding.factory, world);
+          return KeyEventResult.handled;
+      }
     }
-    return KeyEventResult.handled;
+    return KeyEventResult.ignored;
   }
 
   @override

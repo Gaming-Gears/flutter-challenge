@@ -9,7 +9,7 @@ dependencies:
   basic_utils: ^5.7.0
   bitsdojo_window: ^0.1.6
   flame: ^1.14.0
-  flame_audio: ^0.1.0-rc5
+  flame_audio: ^2.1.7
   flame_rive: ^1.9.10
   flutter:
     sdk: flutter
