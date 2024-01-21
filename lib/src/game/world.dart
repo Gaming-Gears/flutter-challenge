@@ -2,13 +2,15 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 
+import 'game.dart';
 import 'tiles/buildings/building.dart';
 import 'tiles/ground/grass.dart';
 import 'tiles/ground/ground.dart';
 import 'tiles/layer.dart';
 import 'tiles/tile.dart';
 
-final class SustainaCityWorld extends World {
+final class SustainaCityWorld extends World
+    with HasGameRef<SustainaCityGame>, Pauseable {
   /// The width/height of the map (measured in units).
   static const mapSize = 40;
 
@@ -53,8 +55,5 @@ final class SustainaCityWorld extends World {
   }
 
   @override
-  void update(double dt) {
-    money += moneyRate * dt;
-    super.update(dt);
-  }
+  void gameUpdate(double dt) => money += moneyRate * dt;
 }

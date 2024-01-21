@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../screens/game_screen.dart';
@@ -11,6 +13,20 @@ import 'camera_controls.dart';
 import 'tiles/coordinates.dart';
 import 'tiles/tile.dart';
 import 'world.dart';
+
+mixin Pauseable on HasGameRef<SustainaCityGame> {
+  void gameUpdate(double dt);
+
+  @override
+  @nonVirtual
+  void update(double dt) {
+    if (gameRef.isPaused) {
+      return;
+    }
+    gameUpdate(dt);
+    super.update(dt);
+  }
+}
 
 final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     with
@@ -22,6 +38,8 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
         ScrollDetector {
   /// The current build mode. This determines what happens when the players taps
   late BuildMode _buildMode;
+
+  bool isPaused = false;
 
   SustainaCityGame() : super(world: SustainaCityWorld()) {
     pauseWhenBackgrounded = false;
@@ -62,7 +80,7 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     for (final key in keysPressed) {
       switch (key) {
         case LogicalKeyboardKey.escape:
-          overlays.add(GameScreen.pauseKey);
+          overlays.add(GameScreen.settingsMenu);
           return KeyEventResult.handled;
         case LogicalKeyboardKey.digit1:
           _buildMode = BuildingBuildMode(CurrentBuilding.smallHouse, world);

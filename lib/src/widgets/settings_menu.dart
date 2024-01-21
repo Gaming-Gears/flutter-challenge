@@ -11,10 +11,12 @@ Future<void> showSettingsMenu(
   BuildContext context,
   SustainaCityGame game,
 ) async {
+  game.isPaused = true;
   await StyledDialog.show<void>(
     context: context,
     builder: (_) => const SettingsMenu(),
   );
+  game.isPaused = false;
 }
 
 final class SettingsMenu extends StatelessWidget {
