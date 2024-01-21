@@ -7,10 +7,10 @@ final class Factory extends Building {
   String get spritePath => 'factory.png';
 
   @override
-  int get tileHeight => 36;
+  int get tileHeight => 24;
 
   @override
-  int get tileWidth => 50;
+  int get tileWidth => 35;
 
   @override
   int get srcTileOffsetX => 0;

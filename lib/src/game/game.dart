@@ -10,6 +10,8 @@ import 'tiles/coordinates.dart';
 import 'tiles/tile.dart';
 import 'world.dart';
 
+enum ActiveTile { factory, smallHouse, largeHouse }
+
 final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     with
         SingleGameInstance,

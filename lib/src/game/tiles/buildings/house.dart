@@ -1,42 +1,49 @@
 import 'building.dart';
 
-enum Model { vertical, horizontal }
+abstract base class House extends Building {
+  House(super.coordinates) : super();
+}
 
-final class House extends Building {
-  final Model model;
-
-  House(super.coordinates, this.model) : super();
-
-  @override
-  String get spritePath => switch (model) {
-        Model.vertical => 'suburbs2_TileB.png',
-        Model.horizontal => 'suburbs_TileE.png',
-      };
+final class SmallHouse extends House {
+  SmallHouse(super.coordinates) : super();
 
   @override
-  int get tileHeight => switch (model) {
-        Model.vertical => 10,
-        Model.horizontal => 10,
-      };
+  String get spritePath => 'suburbs2_TileB.png';
 
   @override
-  int get tileWidth => switch (model) {
-        Model.vertical => 5,
-        Model.horizontal => 8,
-      };
+  int get tileWidth => 5;
+
+  @override
+  int get tileHeight => 10;
 
   @override
   int get srcTileOffsetX => 0;
 
   @override
-  int get srcTileOffsetY => switch (model) {
-        Model.vertical => 0,
-        Model.horizontal => 6,
-      };
+  int get srcTileOffsetY => 0;
 
   @override
-  double get price => switch (model) {
-        Model.vertical => 100,
-        Model.horizontal => 200,
-      };
+  double get price => 100;
+}
+
+final class LargeHouse extends House {
+  LargeHouse(super.coordinates) : super();
+
+  @override
+  String get spritePath => 'suburbs_TileE.png';
+
+  @override
+  int get tileWidth => 8;
+
+  @override
+  int get tileHeight => 10;
+
+  @override
+  int get srcTileOffsetX => 0;
+
+  @override
+  int get srcTileOffsetY => 6;
+
+  @override
+  double get price => 200;
 }
