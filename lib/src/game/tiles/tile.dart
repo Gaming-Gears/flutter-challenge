@@ -7,12 +7,42 @@ import 'package:flame/flame.dart';
 import 'package:flutter/painting.dart';
 
 import '../game.dart';
+import '../world.dart';
 import 'coordinates.dart';
 import 'layer.dart';
 
+/// Thrown when a layer is not found for a given tile type.
+final class LayerNotFound implements Exception {
+  final Type type;
+  final Map<Type, Type> availableLayers;
+
+  const LayerNotFound(this.type, this.availableLayers) : super();
+
+  @override
+  String toString() =>
+      'No layer found for $type, available layers are: $availableLayers';
+}
+
+/// Thrown when a tile is placed on an incorrect layer.
+final class IncorrectLayerType implements Exception {
+  final Type type;
+  final Type incorrect;
+  final Type correct;
+
+  const IncorrectLayerType(this.type, this.incorrect, this.correct) : super();
+
+  @override
+  String toString() =>
+      'Incorrect layer for $type: $incorrect, correct layer was: $correct';
+}
+
 /// The "MOTHER OF ALL TILES"
 abstract base class Tile<T extends Tile<T>> extends SpriteComponent
-    with HoverCallbacks, TapCallbacks, HasGameRef<SustainaCityGame> {
+    with
+        HoverCallbacks,
+        TapCallbacks,
+        HasGameRef<SustainaCityGame>,
+        HasWorldReference<SustainaCityWorld> {
   /// Pixel size of a single unit
   static const unitSize = 32.0;
 
@@ -38,16 +68,6 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
           ),
         ) {
     paint.isAntiAlias = false;
-    final Layer<Tile<dynamic>>? tileLayer = tileToLayer[T];
-    if (tileLayer == null) {
-      throw LayerNotFound(T);
-    }
-    if (tileLayer is Layer<T>) {
-      layer = tileLayer;
-      priority = layer.priority;
-    } else {
-      throw IncorrectLayerType(T, tileLayer.runtimeType, Layer<T>);
-    }
   }
 
   /// The path to the sprite sheet
@@ -100,12 +120,29 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
 
   @override
   FutureOr<void> onLoad() async {
+    // get the layer corresponding to this tile type
+    final Layer<Tile<dynamic>>? tileLayer = world.tileToLayer[T];
+    if (tileLayer == null) {
+      throw LayerNotFound(
+          T,
+          world.tileToLayer
+              .map((key, value) => MapEntry(key, value.runtimeType)));
+    }
+    if (tileLayer is Layer<T>) {
+      layer = tileLayer;
+      priority = layer.priority;
+    } else {
+      throw IncorrectLayerType(T, tileLayer.runtimeType, Layer<T>);
+    }
+
+    // load and set the sprite
     sprite = Sprite(
       await Flame.images.load(spritePath),
       srcSize: Vector2(tileWidth * unitSize, tileHeight * unitSize),
       srcPosition:
           Vector2(srcTileOffsetX * unitSize, srcTileOffsetY * unitSize),
     );
+
     return await super.onLoad();
   }
 

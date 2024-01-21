@@ -39,6 +39,9 @@ final class SustainaCityWorld extends World with HasGameRef<SustainaCityGame> {
   /// All the layers in the world.
   late final layers = <Layer<Tile>>[groundLayer, buildingLayer];
 
+  /// Maps tile types to the layers they should go in.
+  final tileToLayer = <Type, Layer>{};
+
   /// The amount of money the player has.
   double money = initialMoney;
 

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flame/components.dart';
 
 import '../../logger.dart';
-import '../game.dart';
 import '../world.dart';
 import 'coordinates.dart';
 import 'tile.dart';
@@ -31,47 +30,22 @@ extension LayerTileCoordinates on TileCoordinates {
       (x + SustainaCityWorld.mapBounds);
 }
 
-final tileToLayer = <Type, Layer>{};
-
-/// Thrown when a layer is not found for a given tile type.
-final class LayerNotFound implements Exception {
-  final Type type;
-
-  const LayerNotFound(this.type) : super();
-
-  @override
-  String toString() => 'No layer found for $type';
-}
-
-/// Thrown when a tile is placed on an incorrect layer.
-final class IncorrectLayerType implements Exception {
-  final Type type;
-  final Type incorrect;
-  final Type correct;
-
-  const IncorrectLayerType(this.type, this.incorrect, this.correct) : super();
-
-  @override
-  String toString() =>
-      'Incorrect layer for $type: $incorrect, correct layer was: $correct';
-}
-
 /// Represents a single z-axis layer of tiles.
 final class Layer<T extends Tile<T>> extends Component
-    with HasGameRef<SustainaCityGame> {
+    with HasWorldReference<SustainaCityWorld> {
+  final T? Function(TileCoordinates coordinates) initialTileGenerator;
   late final List<T?> tiles;
 
   /// Creates a new layer, calling [tileGenerator] to populate each tile.
-  Layer(T? Function(TileCoordinates coordinates) tileGenerator,
-      {required super.priority})
-      : super() {
-    tileToLayer[T] = this;
-    tiles = List.generate(SustainaCityWorld.mapSize * SustainaCityWorld.mapSize,
-        (index) => tileGenerator(LayerTileCoordinates.fromArrayIndex(index)));
-  }
+  Layer(this.initialTileGenerator, {required super.priority}) : super();
 
   @override
   FutureOr<void> onLoad() async {
+    world.tileToLayer[T] = this;
+    tiles = List.generate(
+        SustainaCityWorld.mapSize * SustainaCityWorld.mapSize,
+        (index) =>
+            initialTileGenerator(LayerTileCoordinates.fromArrayIndex(index)));
     for (final tile in tiles) {
       if (tile != null) {
         await add(tile);
