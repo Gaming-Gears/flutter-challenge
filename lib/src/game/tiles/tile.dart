@@ -70,6 +70,34 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
     paint.isAntiAlias = false;
   }
 
+  @override
+  FutureOr<void> onLoad() async {
+    // get the layer corresponding to this tile type
+    final Layer<Tile<dynamic>>? tileLayer = world.tileToLayer[T];
+    if (tileLayer == null) {
+      throw LayerNotFound(
+          T,
+          world.tileToLayer
+              .map((key, value) => MapEntry(key, value.runtimeType)));
+    }
+    if (tileLayer is Layer<T>) {
+      layer = tileLayer;
+      priority = layer.priority;
+    } else {
+      throw IncorrectLayerType(T, tileLayer.runtimeType, Layer<T>);
+    }
+
+    // load and set the sprite
+    sprite = Sprite(
+      await Flame.images.load(spritePath),
+      srcSize: Vector2(tileWidth * unitSize, tileHeight * unitSize),
+      srcPosition:
+          Vector2(srcTileOffsetX * unitSize, srcTileOffsetY * unitSize),
+    );
+
+    return await super.onLoad();
+  }
+
   /// The path to the sprite sheet
   String get spritePath;
 
@@ -116,34 +144,6 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
       }
     });
     layer.remove(this);
-  }
-
-  @override
-  FutureOr<void> onLoad() async {
-    // get the layer corresponding to this tile type
-    final Layer<Tile<dynamic>>? tileLayer = world.tileToLayer[T];
-    if (tileLayer == null) {
-      throw LayerNotFound(
-          T,
-          world.tileToLayer
-              .map((key, value) => MapEntry(key, value.runtimeType)));
-    }
-    if (tileLayer is Layer<T>) {
-      layer = tileLayer;
-      priority = layer.priority;
-    } else {
-      throw IncorrectLayerType(T, tileLayer.runtimeType, Layer<T>);
-    }
-
-    // load and set the sprite
-    sprite = Sprite(
-      await Flame.images.load(spritePath),
-      srcSize: Vector2(tileWidth * unitSize, tileHeight * unitSize),
-      srcPosition:
-          Vector2(srcTileOffsetX * unitSize, srcTileOffsetY * unitSize),
-    );
-
-    return await super.onLoad();
   }
 
   /// Tints the sprite to [hoverColor]
