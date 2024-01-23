@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
-import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/flame.dart';
 import 'package:flutter/material.dart';
@@ -37,9 +36,9 @@ final class IncorrectLayerType implements Exception {
 
 /// The "MOTHER OF ALL TILES"
 abstract base class Tile<T extends Tile<T>> extends SpriteComponent
-    with HoverCallbacks, HasWorldReference<SustainaCityWorld> {
+    with HasWorldReference<SustainaCityWorld> {
   /// Pixel size of a single unit
-  static const unitSize = 32.0;
+  static const pixelSize = 32.0;
 
   /// The tint of the sprite when hovered over
   static const hoverColor = Color.fromARGB(51, 251, 219, 67);
@@ -56,8 +55,8 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
   Tile(this.coordinates)
       : super(
           position: Vector2(
-            coordinates.x * unitSize,
-            coordinates.y * unitSize,
+            coordinates.x * pixelSize,
+            coordinates.y * pixelSize,
           ),
         ) {
     paint.isAntiAlias = false;
@@ -82,9 +81,9 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
     // load and set the sprite
     sprite = Sprite(
       await Flame.images.load(spritePath),
-      srcSize: Vector2(tileWidth * unitSize, tileHeight * unitSize),
+      srcSize: Vector2(widthUnits * pixelSize, tileHeight * pixelSize),
       srcPosition:
-          Vector2(srcTileOffsetX * unitSize, srcTileOffsetY * unitSize),
+          Vector2(srcTileOffsetX * pixelSize, srcTileOffsetY * pixelSize),
     );
 
     // Fixes anti-aliasing issues on web
@@ -100,16 +99,16 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
   /// The path to the sprite sheet
   String get spritePath;
 
-  /// The offset (measured in units) of the sprite within the sprite sheet
+  /// The offset of the sprite within the sprite sheet measured in units
   int get srcTileOffsetX;
 
-  /// The offset (measured in units) of the sprite within the sprite sheet
+  /// The offset of the sprite within the sprite sheet measured in units
   int get srcTileOffsetY;
 
-  /// The width (measured in units) of the sprite
-  int get tileWidth;
+  /// The width of the sprite measured in units
+  int get widthUnits;
 
-  /// The height (measured in units) of the sprite
+  /// The height of the sprite measured in units
   int get tileHeight;
 
   /// Iterate through each unit in the [Tile], calling [callback] on each one.
@@ -122,7 +121,7 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
     void breakLoopCallback() => breakLoop = true;
 
     for (int y = coordinates.y; y < coordinates.y + tileHeight; ++y) {
-      for (int x = coordinates.x; x < coordinates.x + tileWidth; ++x) {
+      for (int x = coordinates.x; x < coordinates.x + widthUnits; ++x) {
         callback(UnitCoordinates(x, y), breakLoopCallback);
         if (breakLoop) {
           return;
@@ -156,37 +155,5 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
     highlighted = false;
     paint.colorFilter =
         const ColorFilter.mode(Colors.transparent, BlendMode.srcATop);
-  }
-
-  @override
-  void onHoverEnter() {
-    final currentlyHovered = world.hoveredTile;
-    if (
-        // If no tile is currently hovered over, highlight this tile
-        currentlyHovered == null ||
-            // If this tile has a higher priority than the currently hovered
-            // tile, highlight this tile
-            currentlyHovered.layer.priority <= layer.priority ||
-            // If this tile is not contained within the currently hovered tile,
-            // highlight this tile
-            !Rect.fromLTWH(
-                    currentlyHovered.coordinates.x.toDouble(),
-                    currentlyHovered.coordinates.y.toDouble(),
-                    currentlyHovered.tileWidth.toDouble(),
-                    currentlyHovered.tileHeight.toDouble())
-                .contains(Offset(
-                    coordinates.x.toDouble(), coordinates.y.toDouble()))) {
-      currentlyHovered?.unhighlight();
-      world.hoveredTile = this;
-      highlight();
-    }
-  }
-
-  @override
-  void onHoverExit() {
-    if (!isRemoved && world.hoveredTile == this) {
-      unhighlight();
-      world.hoveredTile = null;
-    }
   }
 }

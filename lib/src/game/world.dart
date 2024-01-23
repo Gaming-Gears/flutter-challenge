@@ -3,10 +3,9 @@ import 'dart:ui';
 
 import 'package:flame/components.dart';
 
+import 'background.dart';
 import 'game.dart';
 import 'tiles/buildings/building.dart';
-import 'tiles/ground/grass.dart';
-import 'tiles/ground/ground.dart';
 import 'tiles/layer.dart';
 import 'tiles/tile.dart';
 
@@ -17,7 +16,7 @@ const kMapSize = 1500;
 const kMapBounds = kMapSize ~/ 2;
 
 /// The width/height of the map (measured in pixels).
-const kMapSizePixels = kMapSize * Tile.unitSize;
+const kMapSizePixels = kMapSize * Tile.pixelSize;
 
 /// The amount of money the player earns per second.
 const kMoneyRate = 3.0;
@@ -27,24 +26,17 @@ const kInitialMoney = 100.0;
 
 final class SustainaCityWorld extends World
     with HasGameRef<SustainaCityGame>, Pauseable {
-  /// The current units that are in view of the camera.
-  final renderedUnits = <String>{};
-
-  /// This layer houses all the ground tiles.
-  final groundLayer = Layer<Ground>(Grass.new, priority: 0);
+  /// The background of the world. This is a static image.
+  final background = Background();
 
   /// Buildings are placed on this layer.
-  final buildingLayer = Layer<Building>((_) => null, priority: 1);
+  final buildingLayer = Layer<Building>((_) => null);
 
   /// All the layers in the world.
-  late final layers = <Layer<Tile>>[groundLayer, buildingLayer];
+  late final layers = <Layer<Tile>>[buildingLayer];
 
   /// Maps tile types to the layers they should go in.
   final tileToLayer = <Type, Layer>{};
-
-  /// The tile that the mouse is currently hovering over. Null if the mouse
-  /// leaves the game area.
-  Tile<Object?>? hoveredTile;
 
   /// The amount of money the player has.
   double money = kInitialMoney;
@@ -66,8 +58,10 @@ final class SustainaCityWorld extends World
 
   @override
   FutureOr<void> onLoad() async {
-    await add(groundLayer);
-    await add(buildingLayer);
+    await Future.wait<void>([
+      ...layers.map((layer) async => await add(layer)),
+      (() async => await add(background))()
+    ]);
     return await super.onLoad();
   }
 

@@ -13,13 +13,13 @@ const kZoomSpeed = 0.003;
 extension SustainaCityCamera on CameraComponent {
   /// Clamps the camera position to the bounds of the map.
   void _clampPosition() => viewport.position.clampScalar(
-      -kMapBounds * Tile.unitSize * viewfinder.zoom + 1,
-      kMapBounds * Tile.unitSize * viewfinder.zoom);
+      -kMapBounds * Tile.pixelSize * viewfinder.zoom + 1,
+      kMapBounds * Tile.pixelSize * viewfinder.zoom);
 
   /// Returns [position] scaled with [zoom] in units.
   static UnitCoordinates _globalPixelCoordinatesToUnits(
           Vector2 position, double zoom) =>
-      (position / (Tile.unitSize * zoom)).toUnits();
+      (position / (Tile.pixelSize * zoom)).toUnits();
 
   /// Returns half [size] scaled with [zoom] in units, with an extra padding.
   static UnitCoordinates _halfRenderBounds(Vector2 size, double zoom) =>
@@ -30,29 +30,35 @@ extension SustainaCityCamera on CameraComponent {
   UnitCoordinates halfRenderBounds() =>
       _halfRenderBounds(viewport.size, viewfinder.zoom);
 
-  /// Calls [callback] for each tile that in the range [topLeft], [bottomRight]
-  /// but not in the range [maskTopLeft], [maskBottomRight].
+  /// Calls [callback] for each tile in the range [topLeft], [bottomRight] but
+  /// not in the range [maskTopLeft], [maskBottomRight].
+  ///
+  /// [callback] should return true if the tile was handled, or false otherwise.
   static void _updateRenderedTilesHelper(
     UnitCoordinates topLeft,
     UnitCoordinates bottomRight,
     UnitCoordinates maskTopLeft,
     UnitCoordinates maskBottomRight,
     Layer layer,
-    void Function(Tile<dynamic> coordinates) callback,
+    bool Function(Tile<dynamic> coordinates) callback,
   ) {
+    final checkedCoordinates = <String>{};
     for (int y = topLeft.y; y <= bottomRight.y; ++y) {
       for (int x = topLeft.x; x <= bottomRight.x; ++x) {
-        if (x < maskTopLeft.x ||
-            x > maskBottomRight.x ||
-            y < maskTopLeft.y ||
-            y > maskBottomRight.y) {
-          final coordinates = UnitCoordinates(x, y);
-          final tile = layer.get(coordinates);
-          if (tile != null) {
-            callback(tile);
+        final coordinates = UnitCoordinates(x, y);
+        if (!checkedCoordinates.contains(coordinates.toString())) {
+          if (x < maskTopLeft.x ||
+              x > maskBottomRight.x ||
+              y < maskTopLeft.y ||
+              y > maskBottomRight.y) {
+            final tile = layer.get(coordinates);
+            if (tile != null && callback(tile)) {
+              tile.forEachUnit((coordinates, breakLoop) =>
+                  checkedCoordinates.add(coordinates.toString()));
+            }
+          } else {
+            x = maskBottomRight.x;
           }
-        } else {
-          x = maskBottomRight.x;
         }
       }
     }
@@ -66,6 +72,10 @@ extension SustainaCityCamera on CameraComponent {
     // The new position of the camera in units
     final positionUnits =
         _globalPixelCoordinatesToUnits(-viewport.position, viewfinder.zoom);
+
+    // Move the background so that it is centered on the camera
+    final theWorld = world as SustainaCityWorld;
+    theWorld.background.updatePosition(positionUnits);
 
     // Half the old local bounds of the viewport in units
     final oldHalfBounds = _halfRenderBounds(viewport.size, oldZoom);
@@ -88,7 +98,6 @@ extension SustainaCityCamera on CameraComponent {
         ((oldPositionUnits + (oldHalfBounds, checkBounds: false))
             .clampScalar(-kMapBounds, kMapBounds - 1));
 
-    final theWorld = world as SustainaCityWorld;
     for (final layer in theWorld.layers) {
       // Hide the tiles that are no longer in the viewport
       _updateRenderedTilesHelper(
@@ -105,13 +114,16 @@ extension SustainaCityCamera on CameraComponent {
         });
         if (!inBounds) {
           layer.remove(tile);
+          return true;
         }
+        return false;
       });
 
       // Show the tiles that are now in the viewport
       _updateRenderedTilesHelper(
           topLeft, bottomRight, oldTopLeft, oldBottomRight, layer, (tile) {
         layer.add(tile);
+        return true;
       });
     }
   }

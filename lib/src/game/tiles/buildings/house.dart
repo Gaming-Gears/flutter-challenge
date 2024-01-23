@@ -16,7 +16,7 @@ final class SmallHouse extends House {
   String get spritePath => 'suburbs2_TileB.png';
 
   @override
-  int get tileWidth => 5;
+  int get widthUnits => 5;
 
   @override
   int get tileHeight => 10;
@@ -41,7 +41,7 @@ final class LargeHouse extends House {
   String get spritePath => 'suburbs_TileE.png';
 
   @override
-  int get tileWidth => 8;
+  int get widthUnits => 8;
 
   @override
   int get tileHeight => 10;
