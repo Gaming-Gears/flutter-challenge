@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/services.dart';
 import '../screens/game_screen.dart';
 import 'build_mode/build_mode.dart';
 import 'camera.dart';
+import 'info_box/info_box.dart';
 import 'tiles/coordinates.dart';
 import 'tiles/tile.dart';
 import 'world.dart';
@@ -49,6 +51,7 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   @override
   FutureOr<void> onLoad() async {
     _buildMode = BuildingBuildMode(CurrentBuilding.smallHouse, world);
+
     return await super.onLoad();
   }
 
@@ -132,5 +135,12 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     }
 
     super.onPointerMove(event);
+  }
+
+  @override
+  void onTap() {
+    camera.viewport.add(InfoBoxComponent(
+        info: 'info', position: Vector2(500, 500), size: Vector2(200, 100)));
+    super.onTap();
   }
 }
