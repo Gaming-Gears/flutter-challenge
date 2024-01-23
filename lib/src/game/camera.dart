@@ -125,26 +125,27 @@ extension SustainaCityCamera on CameraComponent {
   }
 
   /// Zooms the camera in or out.
-  void zoom(double zoomChange, Vector2 mousePosition) {
+  void zoom(double zoomChange) {
     final oldPosition = viewport.position.clone();
     final oldZoom = viewfinder.zoom;
-    pan(mousePosition * -1);
     viewfinder.zoom =
         (viewfinder.zoom + zoomChange * kZoomSpeed).clamp(kMinZoom, kMaxZoom);
     _clampPosition();
-
-    _updateRenderedTiles(mousePosition * -1, oldZoom);
+    _updateRenderedTiles(oldPosition, oldZoom);
   }
 
-  void panToCursor(Vector2 cursorPosition) {
-    // Calculate the difference between the cursor position and the center of the screen
-    final screenSize = viewport.size;
-    final screenCenter = screenSize / 2;
-    final delta = cursorPosition - screenCenter;
+  /// Moves the camera to the specified position and zooms in or out.
+  void zoomToCursor(double zoomChange, Vector2 mousePosition) {
+    double newZoom = viewfinder.zoom + zoomChange * kZoomSpeed;
+    newZoom = newZoom.clamp(kMinZoom, kMaxZoom);
 
-    // Adjust the camera position based on the calculated difference
-    // This will move the camera in the direction of the cursor
-    viewport.position.add(delta);
-    // Optionally, you can add clamping logic here if you have bounds for camera movement
+    if (newZoom != viewfinder.zoom || viewport.position != -mousePosition) {
+      final oldPosition = viewport.position.clone();
+      final oldZoom = viewfinder.zoom;
+      pan(-mousePosition);
+      viewfinder.zoom = newZoom;
+      _clampPosition();
+      _updateRenderedTiles(oldPosition, oldZoom);
+    }
   }
 }

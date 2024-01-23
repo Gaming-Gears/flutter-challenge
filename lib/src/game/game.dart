@@ -59,16 +59,15 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   void onPanUpdate(DragUpdateInfo info) =>
       camera.pan(camera.viewport.position + info.delta.global);
 
+  /// Zooms the camera in or out.
   @override
-  void onScroll(PointerScrollInfo info) {
-    camera.zoom(info.scrollDelta.global.y, world.lastMousePosition);
-  }
+  void onScroll(PointerScrollInfo info) =>
+      camera.zoomToCursor(info.scrollDelta.global.y, world.lastMousePosition);
 
+  /// Called when the mouse is moved.
   @override
-  void onMouseMove(PointerHoverInfo info) {
-    world.lastMousePosition = info.eventPosition.global;
-    super.onMouseMove(info);
-  }
+  void onMouseMove(PointerHoverInfo info) =>
+      world.lastMousePosition = info.eventPosition.global;
 
   @override
   KeyEventResult onKeyEvent(
