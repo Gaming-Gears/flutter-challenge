@@ -56,10 +56,17 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   }
 
   /// Converts screen coordinates (with pan/zoom) to global coordinates (units)
-  UnitCoordinates _toGlobalCoordinates(Vector2 screenCoordinates) =>
-      ((screenCoordinates - canvasSize.scaled(0.5) - camera.viewport.position) /
-              (camera.viewfinder.zoom * Tile.unitSize))
+  UnitCoordinates? _toGlobalCoordinates(Vector2 screenCoordinates) {
+    try {
+      return ((screenCoordinates -
+                  canvasSize.scaled(0.5) -
+                  camera.viewport.position) /
+              (camera.viewfinder.zoom * Tile.pixelSize))
           .toUnits();
+    } on CoordinatesOutOfBounds catch (_) {
+      return null;
+    }
+  }
 
   @override
   void onPanUpdate(DragUpdateInfo info) =>
@@ -101,27 +108,10 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     super.onMount();
   }
 
-  /// Left-click handler
-  @override
-  void onTapUp(TapUpInfo info) {
-    _buildMode.build(_toGlobalCoordinates(info.eventPosition.global));
-    super.onTapUp(info);
-  }
-
-  /// Right-click handler
-  @override
-  void onSecondaryTapUp(TapUpInfo info) {
-    _buildMode.destroy(_toGlobalCoordinates(info.eventPosition.global));
-    super.onSecondaryTapUp(info);
-  }
-
-  @override
-  void onPointerMove(PointerMoveEvent event) {
-    final position = _toGlobalCoordinates(event.devicePosition);
-
+  void updateHighlightedTile(UnitCoordinates coordinates) {
     Tile? newTile;
     for (final layer in world.layers) {
-      newTile = layer.get(position) ?? newTile;
+      newTile = layer.get(coordinates) ?? newTile;
     }
     if (newTile != hoveredTile) {
       if (newTile != null) {
@@ -133,7 +123,36 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
         hoveredTile = null;
       }
     }
+  }
 
+  /// Left-click handler
+  @override
+  void onTapUp(TapUpInfo info) {
+    final position = _toGlobalCoordinates(info.eventPosition.global);
+    if (position != null) {
+      _buildMode.build(position);
+      updateHighlightedTile(position);
+    }
+    super.onTapUp(info);
+  }
+
+  /// Right-click handler
+  @override
+  void onSecondaryTapUp(TapUpInfo info) {
+    final position = _toGlobalCoordinates(info.eventPosition.global);
+    if (position != null) {
+      _buildMode.destroy(position);
+      updateHighlightedTile(position);
+    }
+    super.onSecondaryTapUp(info);
+  }
+
+  @override
+  void onPointerMove(PointerMoveEvent event) {
+    final position = _toGlobalCoordinates(event.devicePosition);
+    if (position != null) {
+      updateHighlightedTile(position);
+    }
     super.onPointerMove(event);
   }
 

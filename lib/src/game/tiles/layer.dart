@@ -105,7 +105,7 @@ final class Layer<T extends Tile<T>> extends Component
       // This will occur if the player tries to build on the edge of the map.
       // This is an expected error and should be caught and handled.
     } on CoordinatesOutOfBounds catch (e) {
-      error(e.toString());
+      error('Tried to place $tile but $e');
       return false;
     }
 

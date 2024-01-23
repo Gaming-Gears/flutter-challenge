@@ -12,13 +12,13 @@ const kZoomSpeed = 0.003;
 extension SustainaCityCamera on CameraComponent {
   /// Clamps the camera position to the bounds of the map.
   void _clampPosition() => viewport.position.clampScalar(
-      -kMapBounds * Tile.unitSize * viewfinder.zoom + 1,
-      kMapBounds * Tile.unitSize * viewfinder.zoom);
+      -kMapBounds * Tile.pixelSize * viewfinder.zoom + 1,
+      kMapBounds * Tile.pixelSize * viewfinder.zoom);
 
   /// Returns [position] scaled with [zoom] in units.
   static UnitCoordinates _globalPixelCoordinatesToUnits(
           Vector2 position, double zoom) =>
-      (position / (Tile.unitSize * zoom)).toUnits();
+      (position / (Tile.pixelSize * zoom)).toUnits();
 
   /// Returns half [size] scaled with [zoom] in units, with an extra padding.
   static UnitCoordinates _halfRenderBounds(Vector2 size, double zoom) =>
@@ -72,6 +72,10 @@ extension SustainaCityCamera on CameraComponent {
     final positionUnits =
         _globalPixelCoordinatesToUnits(-viewport.position, viewfinder.zoom);
 
+    // Move the background so that it is centered on the camera
+    final theWorld = world as SustainaCityWorld;
+    theWorld.background.updatePosition(positionUnits);
+
     // Half the old local bounds of the viewport in units
     final oldHalfBounds = _halfRenderBounds(viewport.size, oldZoom);
 
@@ -93,7 +97,6 @@ extension SustainaCityCamera on CameraComponent {
         ((oldPositionUnits + (oldHalfBounds, checkBounds: false))
             .clampScalar(-kMapBounds, kMapBounds - 1));
 
-    final theWorld = world as SustainaCityWorld;
     for (final layer in theWorld.layers) {
       // Hide the tiles that are no longer in the viewport
       _updateRenderedTilesHelper(

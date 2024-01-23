@@ -21,16 +21,10 @@ final class BuildingBuildMode extends BuildMode {
     if (world.money < building.price) {
       error('Need \$${building.price}, but only have \$${world.money}');
     } else {
-      try {
-        if (world.buildingLayer.setTile(building)) {
-          world.groundLayer.get(coordinates)?.unhighlight();
-          building.highlight();
-
-          // Deduct the price of the building from the player's money
-          world.money -= building.price;
-        }
-      } on CoordinatesOutOfBounds catch (e) {
-        error(e.toString());
+      // Deduct the price of the building from the player's money only if the
+      // building is successfully placed
+      if (world.buildingLayer.setTile(building)) {
+        world.money -= building.price;
       }
     }
   }
@@ -42,9 +36,6 @@ final class BuildingBuildMode extends BuildMode {
     final building = world.buildingLayer.get(coordinates);
     if (building != null) {
       building.removeFromLayer();
-
-      building.unhighlight();
-      world.groundLayer.get(coordinates)?.highlight();
 
       // Refund the player for a portion of the building's price
       world.money += building.price * kDestroyRefund;

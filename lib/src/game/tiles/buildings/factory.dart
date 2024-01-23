@@ -15,7 +15,7 @@ final class Factory extends Building {
   int get tileHeight => 24;
 
   @override
-  int get tileWidth => 35;
+  int get widthUnits => 36;
 
   @override
   int get srcTileOffsetX => 0;
