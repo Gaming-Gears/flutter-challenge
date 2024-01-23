@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
@@ -31,6 +32,7 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
         SecondaryTapDetector,
         KeyboardEvents,
         PanDetector,
+        MouseMovementDetector,
         ScrollDetector {
   /// The current build mode. This determines what happens when the players taps
   late BuildMode _buildMode;
@@ -58,8 +60,16 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
       camera.pan(camera.viewport.position + info.delta.global);
 
   @override
-  void onScroll(PointerScrollInfo info) =>
-      camera.zoom(info.scrollDelta.global.y);
+  void onScroll(PointerScrollInfo info) {
+    // Determine the zoom change, e.g., based on the scroll delta
+    final zoomChange = info.scrollDelta.global.y;
+
+    // Get the cursor's screen position
+    final cursorScreenPosition = info.eventPosition.global;
+
+    // Call zoomToPoint on your camera controller
+    camera.zoomToPoint(zoomChange, cursorScreenPosition);
+  }
 
   @override
   KeyEventResult onKeyEvent(
