@@ -6,6 +6,7 @@ import 'package:flame/components.dart';
 import 'background.dart';
 import 'game.dart';
 import 'tiles/buildings/building.dart';
+import 'tiles/coordinates.dart';
 import 'tiles/layer.dart';
 import 'tiles/tile.dart';
 
@@ -28,6 +29,9 @@ final class SustainaCityWorld extends World
     with HasGameRef<SustainaCityGame>, Pauseable {
   /// The background of the world. This is a static image.
   final background = Background();
+
+  /// A 1x1 unit square that is used to highlight the background.
+  final backgroundHover = BackgroundHover(UnitCoordinates(0, 0));
 
   /// Buildings are placed on this layer.
   final buildingLayer = Layer<Building>((_) => null);
@@ -60,14 +64,12 @@ final class SustainaCityWorld extends World
   FutureOr<void> onLoad() async {
     await Future.wait<void>([
       ...layers.map((layer) async => await add(layer)),
-      (() async => await add(background))()
+      (() async => await add(background))(),
+      (() async => await add(backgroundHover))()
     ]);
     return await super.onLoad();
   }
 
   @override
-  void update(double dt) {
-    money += kMoneyRate * dt;
-    super.update(dt);
-  }
+  void updateGame(double dt) => money += kMoneyRate * dt;
 }

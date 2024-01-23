@@ -34,14 +34,52 @@ final class IncorrectLayerType implements Exception {
       'Incorrect layer for $type: $incorrect, correct layer was: $correct';
 }
 
+/// The tint of a tile when hovered over
+const kHoverColor = Color.fromARGB(51, 251, 219, 67);
+
+/// A mixin for components that can be hovered over.
+mixin Hoverable {
+  /// Tints the component to [kHoverColor]
+  void highlight();
+
+  /// Removes the tint from the component
+  void unhighlight();
+}
+
+/// Renders a tint over the background when the pointer is hovering over it.
+final class BackgroundHover extends Component with HasPaint, Hoverable {
+  UnitCoordinates coordinates;
+  bool highlighted = false;
+
+  BackgroundHover(this.coordinates) : super(priority: 0) {
+    paint.blendMode = BlendMode.srcATop;
+    paint.color = kHoverColor;
+  }
+
+  @override
+  void render(Canvas canvas) {
+    if (highlighted) {
+      canvas.drawRect(
+        Rect.fromLTWH(coordinates.x * Tile.pixelSize,
+            coordinates.y * Tile.pixelSize, Tile.pixelSize, Tile.pixelSize),
+        paint,
+      );
+    }
+    super.render(canvas);
+  }
+
+  @override
+  void highlight() => highlighted = true;
+
+  @override
+  void unhighlight() => highlighted = false;
+}
+
 /// The "MOTHER OF ALL TILES"
 abstract base class Tile<T extends Tile<T>> extends SpriteComponent
-    with HasWorldReference<SustainaCityWorld> {
+    with HasWorldReference<SustainaCityWorld>, Hoverable {
   /// Pixel size of a single unit
   static const pixelSize = 32.0;
-
-  /// The tint of the sprite when hovered over
-  static const hoverColor = Color.fromARGB(51, 251, 219, 67);
 
   /// The coordinates of the tile
   final UnitCoordinates coordinates;
@@ -144,13 +182,15 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
     layer.remove(this);
   }
 
-  /// Tints the sprite to [hoverColor]
+  /// Tints the sprite to [kHoverColor]
+  @override
   void highlight() {
     highlighted = true;
-    paint.colorFilter = const ColorFilter.mode(hoverColor, BlendMode.srcATop);
+    paint.colorFilter = const ColorFilter.mode(kHoverColor, BlendMode.srcATop);
   }
 
   /// Removes the tint from the sprite
+  @override
   void unhighlight() {
     highlighted = false;
     paint.colorFilter =

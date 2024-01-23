@@ -52,6 +52,18 @@ final class Layer<T extends Tile<T>> extends Component
   /// Creates a new layer, calling [initialTileGenerator] to populate each tile.
   Layer(this.initialTileGenerator) : super();
 
+  Iterable<Future<void>> _loadInitialTiles() sync* {
+    final halfRenderBounds = gameRef.camera.halfRenderBounds();
+    for (int y = -halfRenderBounds.y; y <= halfRenderBounds.y; ++y) {
+      for (int x = -halfRenderBounds.x; x <= halfRenderBounds.x; ++x) {
+        final tile = get(UnitCoordinates(x, y));
+        if (tile != null) {
+          yield (() async => await add(tile))();
+        }
+      }
+    }
+  }
+
   @override
   FutureOr<void> onLoad() async {
     priority = world.layers.indexOf(this);
@@ -63,15 +75,9 @@ final class Layer<T extends Tile<T>> extends Component
         kMapSize * kMapSize,
         (index) => Lazy(() =>
             initialTileGenerator(LayerArrayIndices.fromArrayIndex(index))));
-    final halfRenderBounds = gameRef.camera.halfRenderBounds();
-    for (int y = -halfRenderBounds.y; y <= halfRenderBounds.y; ++y) {
-      for (int x = -halfRenderBounds.x; x <= halfRenderBounds.x; ++x) {
-        final tile = get(UnitCoordinates(x, y));
-        if (tile != null) {
-          await add(tile);
-        }
-      }
-    }
+
+    await Future.wait(_loadInitialTiles());
+
     return await super.onLoad();
   }
 

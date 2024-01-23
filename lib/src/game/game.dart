@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import 'package:flame/game.dart;
-import 'package:flutter/cupertino.dart';
+import 'package:flame/game.dart';
+import 'package:flame/input.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' hide PointerMoveEvent;
 import 'package:flutter/services.dart';
 
 import '../screens/game_screen.dart';
@@ -14,12 +16,15 @@ import 'tiles/coordinates.dart';
 import 'tiles/tile.dart';
 import 'world.dart';
 
+/// Add this to components that can be paused.
 mixin Pauseable on HasGameRef<SustainaCityGame> implements Component {
+  void updateGame(double dt);
+
   @override
-  @mustCallSuper
+  @nonVirtual
   void update(double dt) {
-    if (gameRef.isPaused) {
-      return;
+    if (!gameRef.isPaused) {
+      updateGame(dt);
     }
     super.update(dt);
   }
@@ -32,30 +37,34 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
         SecondaryTapDetector,
         KeyboardEvents,
         PanDetector,
-
         MouseMovementDetector,
-
         ScrollDetector,
         PointerMoveCallbacks {
-
   /// The current build mode. This determines what happens when the players taps
   late BuildMode _buildMode;
 
+  /// The currently hovered tile.
+  late Hoverable _hoveredTile;
+
   /// Whether or not the game is paused.
   bool isPaused = false;
-
-  /// The currently hovered tile.
-  Tile? hoveredTile;
 
   SustainaCityGame() : super(world: SustainaCityWorld()) {
     pauseWhenBackgrounded = false;
   }
 
   @override
-  FutureOr<void> onLoad() async {
-    _buildMode = BuildingBuildMode(CurrentBuilding.smallHouse, world);
+  void onMount() {
+    /// Add the pause button to the game on top left-corner.
+    overlays.add(GameScreen.pauseKey);
+    super.onMount();
+  }
 
-    return await super.onLoad();
+  @override
+  FutureOr<void> onLoad() {
+    _buildMode = BuildingBuildMode(CurrentBuilding.smallHouse, world);
+    _hoveredTile = world.backgroundHover;
+    return super.onLoad();
   }
 
   /// Converts screen coordinates (with pan/zoom) to global coordinates (units)
@@ -110,28 +119,32 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     return KeyEventResult.ignored;
   }
 
-  @override
-  void onMount() {
-    /// Add the pause button to the game on top left-corner.
-    overlays.add(GameScreen.pauseKey);
-    super.onMount();
-  }
-
   void updateHighlightedTile(UnitCoordinates coordinates) {
+    // Find the highest priority tile at the coordinates
     Tile? newTile;
     for (final layer in world.layers) {
       newTile = layer.get(coordinates) ?? newTile;
     }
-    if (newTile != hoveredTile) {
-      if (newTile != null) {
-        hoveredTile?.unhighlight();
-        newTile.highlight();
-        hoveredTile = newTile;
-      } else {
-        hoveredTile?.unhighlight();
-        hoveredTile = null;
+
+    // If the tile is null, highlight the background
+    if (newTile == null) {
+      // If the background is not already highlighted, unhighlight the old tile
+      // and set _hoveredTile to the background
+      if (_hoveredTile != world.backgroundHover) {
+        _hoveredTile.unhighlight();
+        _hoveredTile = world.backgroundHover;
       }
+      // Update the coordinates of the background hover so it tracks the pointer
+      world.backgroundHover.coordinates = coordinates;
+      // If the newly hovered tile is not null and it is not the same as the
+      // currently hovered tile, unhighlight the old tile and set _hoveredTile
+    } else if (_hoveredTile != newTile) {
+      _hoveredTile.unhighlight();
+      _hoveredTile = newTile;
     }
+
+    // Highlight the hovered tile
+    _hoveredTile.highlight();
   }
 
   /// Left-click handler
