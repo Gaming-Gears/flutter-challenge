@@ -61,12 +61,12 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
 
   @override
   void onScroll(PointerScrollInfo info) {
-    camera.zoom(info.scrollDelta.global.y);
+    camera.zoom(info.scrollDelta.global.y, world.lastMousePosition);
   }
 
   @override
   void onMouseMove(PointerHoverInfo info) {
-    camera.panToCursor(info.eventPosition.global);
+    world.lastMousePosition = info.eventPosition.global;
     super.onMouseMove(info);
   }
 

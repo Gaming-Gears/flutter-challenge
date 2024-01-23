@@ -125,13 +125,15 @@ extension SustainaCityCamera on CameraComponent {
   }
 
   /// Zooms the camera in or out.
-  void zoom(double zoomChange) {
+  void zoom(double zoomChange, Vector2 mousePosition) {
     final oldPosition = viewport.position.clone();
     final oldZoom = viewfinder.zoom;
+    pan(mousePosition * -1);
     viewfinder.zoom =
         (viewfinder.zoom + zoomChange * kZoomSpeed).clamp(kMinZoom, kMaxZoom);
     _clampPosition();
-    _updateRenderedTiles(oldPosition, oldZoom);
+
+    _updateRenderedTiles(mousePosition * -1, oldZoom);
   }
 
   void panToCursor(Vector2 cursorPosition) {
