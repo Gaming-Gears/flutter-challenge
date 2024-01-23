@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flame/game.dart';
 
 import 'tiles/coordinates.dart';
 import 'tiles/layer.dart';
@@ -133,47 +134,15 @@ extension SustainaCityCamera on CameraComponent {
     _updateRenderedTiles(oldPosition, oldZoom);
   }
 
-  // Helper method to convert screen position to world position in units
-  UnitCoordinates screenToWorld(Vector2 screenPosition) {
-    // Calculate the screen center
-    final screenCenter = Vector2(viewport.size.x / 2, viewport.size.y / 2);
+  void panToCursor(Vector2 cursorPosition) {
+    // Calculate the difference between the cursor position and the center of the screen
+    final screenSize = viewport.size;
+    final screenCenter = screenSize / 2;
+    final delta = cursorPosition - screenCenter;
 
-    // Calculate the world position at the center of the screen
-    final worldCenter = viewport.position + screenCenter / viewfinder.zoom;
-
-    // Calculate the relative screen position adjusted for zoom
-    final relativeScreenPosition = screenPosition / viewfinder.zoom;
-
-    // Calculate the world position for the screen position
-    final worldPosition = worldCenter + (relativeScreenPosition - screenCenter);
-
-    // Convert to unit coordinates
-    return worldPosition.toUnits();
-  }
-
-  /// Zooms the camera in or out centered around the cursor position.
-  void zoomToPoint(double zoomChange, Vector2 cursorScreenPosition) {
-    final oldZoom = viewfinder.zoom;
-    final newZoom = (oldZoom + zoomChange * kZoomSpeed);
-
-    // Convert the cursor's screen position to the world position before zoom change
-    final cursorWorldBeforeZoom =
-        screenToWorld(cursorScreenPosition).toVector2();
-
-    // Update the zoom level
-    viewfinder.zoom = newZoom;
-
-    // Convert the cursor's screen position to the world position after zoom change
-    final cursorWorldAfterZoom =
-        screenToWorld(cursorScreenPosition).toVector2();
-
-    // Calculate the difference in world position
-    final delta = cursorWorldAfterZoom - cursorWorldBeforeZoom;
-
-    // Adjust the camera position
-    viewport.position -= delta;
-
-    _clampPosition();
-    _updateRenderedTiles(viewport.position, oldZoom);
+    // Adjust the camera position based on the calculated difference
+    // This will move the camera in the direction of the cursor
+    viewport.position.add(delta);
+    // Optionally, you can add clamping logic here if you have bounds for camera movement
   }
 }

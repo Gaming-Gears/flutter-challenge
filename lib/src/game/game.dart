@@ -61,14 +61,13 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
 
   @override
   void onScroll(PointerScrollInfo info) {
-    // Determine the zoom change, e.g., based on the scroll delta
-    final zoomChange = info.scrollDelta.global.y;
+    camera.zoom(info.scrollDelta.global.y);
+  }
 
-    // Get the cursor's screen position
-    final cursorScreenPosition = info.eventPosition.global;
-
-    // Call zoomToPoint on your camera controller
-    camera.zoomToPoint(zoomChange, cursorScreenPosition);
+  @override
+  void onMouseMove(PointerHoverInfo info) {
+    camera.panToCursor(info.eventPosition.global);
+    super.onMouseMove(info);
   }
 
   @override
