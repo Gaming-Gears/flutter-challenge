@@ -18,12 +18,6 @@ Future<void> main() async {
   ));
 
   doWhenWindowReady(() {
-    // Not sure if we need these, but 600x450 is pretty small so I commented
-    // them out
-    // const initialSize = Size(600, 450);
-    // appWindow.minSize = initialSize;
-    // appWindow.size = initialSize;
-
     appWindow.alignment = Alignment.center;
     appWindow.show();
   });

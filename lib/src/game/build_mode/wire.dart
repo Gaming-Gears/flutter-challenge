@@ -4,12 +4,12 @@ final class WireBuildMode extends BuildMode {
   const WireBuildMode(super.world) : super();
 
   @override
-  void build(TileCoordinates coordinates) {
+  void build(UnitCoordinates coordinates) {
     print('Building wire at $coordinates');
   }
 
   @override
-  void destroy(TileCoordinates coordinates) {
+  void destroy(UnitCoordinates coordinates) {
     print('Destroying wire at $coordinates');
   }
 }

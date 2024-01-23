@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 
+import '../../lazy.dart';
 import '../../logger.dart';
+import '../camera.dart';
+import '../game.dart';
 import '../world.dart';
 import 'coordinates.dart';
 import 'tile.dart';
@@ -10,7 +13,7 @@ import 'tile.dart';
 /// Thrown when a tile is not found at the given coordinates but it should be.
 /// This should only happen if there is an error with the code.
 final class TileNotFound {
-  final TileCoordinates coordinates;
+  final UnitCoordinates coordinates;
 
   const TileNotFound(this.coordinates) : super();
 
@@ -18,23 +21,22 @@ final class TileNotFound {
   String toString() => 'No tile at $coordinates';
 }
 
-extension LayerTileCoordinates on TileCoordinates {
-  /// Gets the [TileCoordinates] associated with a given array index.
-  static TileCoordinates fromArrayIndex(int index) => TileCoordinates(
-      (index % SustainaCityWorld.mapSize) - SustainaCityWorld.mapBounds,
-      (index ~/ SustainaCityWorld.mapSize) - SustainaCityWorld.mapBounds);
+extension LayerArrayIndices on UnitCoordinates {
+  /// Gets the [UnitCoordinates] associated with a given array index.
+  static UnitCoordinates fromArrayIndex(int index) => UnitCoordinates(
+        (index % kMapSize) - kMapBounds,
+        (index ~/ kMapSize) - kMapBounds,
+      );
 
   /// Converts the coordinates to an array index for the _tiles array in [Layer]
-  int toArrayIndex() =>
-      (y + SustainaCityWorld.mapBounds) * SustainaCityWorld.mapSize +
-      (x + SustainaCityWorld.mapBounds);
+  int toArrayIndex() => (y + kMapBounds) * kMapSize + (x + kMapBounds);
 }
 
 /// Represents a single z-axis layer of tiles.
 final class Layer<T extends Tile<T>> extends Component
-    with HasWorldReference<SustainaCityWorld> {
-  final T? Function(TileCoordinates coordinates) initialTileGenerator;
-  late final List<T?> tiles;
+    with HasWorldReference<SustainaCityWorld>, HasGameRef<SustainaCityGame> {
+  final T? Function(UnitCoordinates coordinates) initialTileGenerator;
+  late final List<Lazy<T?>> tiles;
 
   /// Creates a new layer, calling [initialTileGenerator] to populate each tile.
   Layer(this.initialTileGenerator, {required super.priority}) : super();
@@ -43,23 +45,28 @@ final class Layer<T extends Tile<T>> extends Component
   FutureOr<void> onLoad() async {
     world.tileToLayer[T] = this;
     tiles = List.generate(
-        SustainaCityWorld.mapSize * SustainaCityWorld.mapSize,
-        (index) =>
-            initialTileGenerator(LayerTileCoordinates.fromArrayIndex(index)));
-    for (final tile in tiles) {
-      if (tile != null) {
-        await add(tile);
+        kMapSize * kMapSize,
+        (index) => Lazy(() =>
+            initialTileGenerator(LayerArrayIndices.fromArrayIndex(index))));
+    final halfRenderBounds = gameRef.camera.halfRenderBounds();
+    for (int y = -halfRenderBounds.y; y <= halfRenderBounds.y; ++y) {
+      for (int x = -halfRenderBounds.x; x <= halfRenderBounds.x; ++x) {
+        final tile = get(UnitCoordinates(x, y));
+        if (tile != null) {
+          await add(tile);
+        }
       }
     }
-    return super.onLoad();
+    return await super.onLoad();
   }
 
   /// Returns the tile at the given coordinates.
-  T? get(TileCoordinates coordinates) => tiles[coordinates.toArrayIndex()];
+  T? get(UnitCoordinates coordinates) =>
+      tiles[coordinates.toArrayIndex()].value;
 
   /// Removes and returns the tile at the given coordinates. Returns null if no
   /// tile was found.
-  T? removeTile(TileCoordinates coordinates) =>
+  T? removeTile(UnitCoordinates coordinates) =>
       get(coordinates)?..removeFromLayer();
 
   /// Sets the tile at the given coordinates. Returns true if the tile was
@@ -92,7 +99,7 @@ final class Layer<T extends Tile<T>> extends Component
     if (!overlaps) {
       // Once we know that the new tile is valid, add it to the layer.
       tile.forEachUnit(
-          (coordinates, _) => tiles[coordinates.toArrayIndex()] = tile);
+          (coordinates, _) => tiles[coordinates.toArrayIndex()].value = tile);
 
       // Add the tile to the flame component list.
       add(tile);

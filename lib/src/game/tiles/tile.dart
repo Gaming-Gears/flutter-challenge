@@ -37,7 +37,7 @@ final class IncorrectLayerType implements Exception {
 
 /// The "MOTHER OF ALL TILES"
 abstract base class Tile<T extends Tile<T>> extends SpriteComponent
-    with HoverCallbacks, TapCallbacks, HasWorldReference<SustainaCityWorld> {
+    with HoverCallbacks, HasWorldReference<SustainaCityWorld> {
   /// Pixel size of a single unit
   static const unitSize = 32.0;
 
@@ -45,10 +45,13 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
   static const hoverColor = Color.fromARGB(51, 251, 219, 67);
 
   /// The coordinates of the tile
-  final TileCoordinates coordinates;
+  final UnitCoordinates coordinates;
 
   /// The layer this tile is on
   late final Layer<T> layer;
+
+  /// Whether or not the tile is highlighted
+  bool highlighted = false;
 
   Tile(this.coordinates)
       : super(
@@ -72,7 +75,6 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
     }
     if (tileLayer is Layer<T>) {
       layer = tileLayer;
-      priority = layer.priority;
     } else {
       throw IncorrectLayerType(T, tileLayer.runtimeType, Layer<T>);
     }
@@ -86,7 +88,11 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
     );
 
     // Fixes anti-aliasing issues on web
-    unhighlight();
+    if (highlighted) {
+      highlight();
+    } else {
+      unhighlight();
+    }
 
     return await super.onLoad();
   }
@@ -109,15 +115,15 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
   /// Iterate through each unit in the [Tile], calling [callback] on each one.
   void forEachUnit(
       void Function(
-        TileCoordinates coordinates,
+        UnitCoordinates coordinates,
         VoidCallback breakLoop,
       ) callback) {
     bool breakLoop = false;
     void breakLoopCallback() => breakLoop = true;
 
-    for (int x = coordinates.x; x < coordinates.x + tileWidth; x++) {
-      for (int y = coordinates.y; y < coordinates.y + tileHeight; y++) {
-        callback(TileCoordinates(x, y), breakLoopCallback);
+    for (int y = coordinates.y; y < coordinates.y + tileHeight; ++y) {
+      for (int x = coordinates.x; x < coordinates.x + tileWidth; ++x) {
+        callback(UnitCoordinates(x, y), breakLoopCallback);
         if (breakLoop) {
           return;
         }
@@ -133,19 +139,24 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
         // invalid.
         throw TileNotFound(coordinates);
       } else {
-        layer.tiles[coordinates.toArrayIndex()] = null;
+        layer.tiles[coordinates.toArrayIndex()].value = null;
       }
     });
     layer.remove(this);
   }
 
   /// Tints the sprite to [hoverColor]
-  void highlight() =>
-      paint.colorFilter = const ColorFilter.mode(hoverColor, BlendMode.srcATop);
+  void highlight() {
+    highlighted = true;
+    paint.colorFilter = const ColorFilter.mode(hoverColor, BlendMode.srcATop);
+  }
 
   /// Removes the tint from the sprite
-  void unhighlight() => paint.colorFilter =
-      const ColorFilter.mode(Colors.transparent, BlendMode.srcATop);
+  void unhighlight() {
+    highlighted = false;
+    paint.colorFilter =
+        const ColorFilter.mode(Colors.transparent, BlendMode.srcATop);
+  }
 
   @override
   void onHoverEnter() {
@@ -155,7 +166,7 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
         currentlyHovered == null ||
             // If this tile has a higher priority than the currently hovered
             // tile, highlight this tile
-            currentlyHovered.priority <= priority ||
+            currentlyHovered.layer.priority <= layer.priority ||
             // If this tile is not contained within the currently hovered tile,
             // highlight this tile
             !Rect.fromLTWH(

@@ -14,7 +14,7 @@ sealed class BuildMode {
 
   const BuildMode(this.world) : super();
 
-  void build(TileCoordinates coordinates);
+  void build(UnitCoordinates coordinates);
 
-  void destroy(TileCoordinates coordinates);
+  void destroy(UnitCoordinates coordinates);
 }

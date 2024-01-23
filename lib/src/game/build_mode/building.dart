@@ -2,17 +2,17 @@ part of 'build_mode.dart';
 
 enum CurrentBuilding { factory, smallHouse, largeHouse }
 
-final class BuildingBuildMode extends BuildMode {
-  /// The percentage the player gets back when destroying a building.
-  static const destroyRefund = 0.8;
+/// The percentage the player gets back when destroying a building.
+const kDestroyRefund = 0.8;
 
+final class BuildingBuildMode extends BuildMode {
   final CurrentBuilding currentBuilding;
 
   const BuildingBuildMode(this.currentBuilding, super.world) : super();
 
   /// Builds a [Building] on the building [Layer] in [world].
   @override
-  void build(TileCoordinates coordinates) {
+  void build(UnitCoordinates coordinates) {
     final hoveredTile = world.hoveredTile;
     if (hoveredTile != null) {
       final building = switch (currentBuilding) {
@@ -42,7 +42,7 @@ final class BuildingBuildMode extends BuildMode {
   /// Destroys the currently hovered [Building], then highlights the tile at
   /// [coordinates].
   @override
-  void destroy(TileCoordinates coordinates) {
+  void destroy(UnitCoordinates coordinates) {
     final hoveredBuilding = world.hoveredTile;
     if (hoveredBuilding != null && hoveredBuilding is Building) {
       hoveredBuilding.removeFromLayer();
@@ -64,7 +64,7 @@ final class BuildingBuildMode extends BuildMode {
       world.hoveredTile?.highlight();
 
       // Refund the player for a portion of the building's price
-      world.money += hoveredBuilding.price * destroyRefund;
+      world.money += hoveredBuilding.price * kDestroyRefund;
     }
   }
 }

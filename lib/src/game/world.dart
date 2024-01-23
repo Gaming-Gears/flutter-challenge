@@ -9,22 +9,25 @@ import 'tiles/ground/ground.dart';
 import 'tiles/layer.dart';
 import 'tiles/tile.dart';
 
+/// The width/height of the map (measured in units).
+const kMapSize = 1500;
+
+/// The bounds of the map in the tile coordinate system (measured in units).
+const kMapBounds = kMapSize ~/ 2;
+
+/// The width/height of the map (measured in pixels).
+const kMapSizePixels = kMapSize * Tile.unitSize;
+
+/// The amount of money the player earns per second.
+const kMoneyRate = 3.0;
+
+/// The amount of money the player starts with.
+const kInitialMoney = 100.0;
+
 final class SustainaCityWorld extends World
     with HasGameRef<SustainaCityGame>, Pauseable {
-  /// The width/height of the map (measured in units).
-  static const mapSize = 40;
-
-  /// The bounds of the map in the tile coordinate system (measured in units).
-  static const mapBounds = mapSize ~/ 2;
-
-  /// The width/height of the map (measured in pixels).
-  static const mapSizePixels = mapSize * Tile.unitSize;
-
-  /// The amount of money the player earns per second.
-  static const moneyRate = 3.0;
-
-  /// The amount of money the player starts with.
-  static const initialMoney = 100.0;
+  /// The current units that are in view of the camera.
+  final renderedUnits = <String>{};
 
   /// This layer houses all the ground tiles.
   final groundLayer = Layer<Ground>(Grass.new, priority: 0);
@@ -43,7 +46,7 @@ final class SustainaCityWorld extends World
   Tile<Object?>? hoveredTile;
 
   /// The amount of money the player has.
-  double money = initialMoney;
+  double money = kInitialMoney;
 
   SustainaCityWorld() : super();
 
@@ -55,5 +58,8 @@ final class SustainaCityWorld extends World
   }
 
   @override
-  void gameUpdate(double dt) => money += moneyRate * dt;
+  void update(double dt) {
+    money += kMoneyRate * dt;
+    super.update(dt);
+  }
 }
