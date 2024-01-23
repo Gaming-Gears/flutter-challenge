@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
-import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/flame.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +36,7 @@ final class IncorrectLayerType implements Exception {
 
 /// The "MOTHER OF ALL TILES"
 abstract base class Tile<T extends Tile<T>> extends SpriteComponent
-    with HoverCallbacks, HasWorldReference<SustainaCityWorld> {
+    with HasWorldReference<SustainaCityWorld> {
   /// Pixel size of a single unit
   static const unitSize = 32.0;
 
@@ -156,37 +155,5 @@ abstract base class Tile<T extends Tile<T>> extends SpriteComponent
     highlighted = false;
     paint.colorFilter =
         const ColorFilter.mode(Colors.transparent, BlendMode.srcATop);
-  }
-
-  @override
-  void onHoverEnter() {
-    final currentlyHovered = world.hoveredTile;
-    if (
-        // If no tile is currently hovered over, highlight this tile
-        currentlyHovered == null ||
-            // If this tile has a higher priority than the currently hovered
-            // tile, highlight this tile
-            currentlyHovered.layer.priority <= layer.priority ||
-            // If this tile is not contained within the currently hovered tile,
-            // highlight this tile
-            !Rect.fromLTWH(
-                    currentlyHovered.coordinates.x.toDouble(),
-                    currentlyHovered.coordinates.y.toDouble(),
-                    currentlyHovered.tileWidth.toDouble(),
-                    currentlyHovered.tileHeight.toDouble())
-                .contains(Offset(
-                    coordinates.x.toDouble(), coordinates.y.toDouble()))) {
-      currentlyHovered?.unhighlight();
-      world.hoveredTile = this;
-      highlight();
-    }
-  }
-
-  @override
-  void onHoverExit() {
-    if (!isRemoved && world.hoveredTile == this) {
-      unhighlight();
-      world.hoveredTile = null;
-    }
   }
 }

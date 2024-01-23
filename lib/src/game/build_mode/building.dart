@@ -13,28 +13,24 @@ final class BuildingBuildMode extends BuildMode {
   /// Builds a [Building] on the building [Layer] in [world].
   @override
   void build(UnitCoordinates coordinates) {
-    final hoveredTile = world.hoveredTile;
-    if (hoveredTile != null) {
-      final building = switch (currentBuilding) {
-        CurrentBuilding.factory => Factory(hoveredTile.coordinates),
-        CurrentBuilding.smallHouse => SmallHouse(hoveredTile.coordinates),
-        CurrentBuilding.largeHouse => LargeHouse(hoveredTile.coordinates),
-      };
-      if (world.money < building.price) {
-        error('Need \$${building.price}, but only have \$${world.money}');
-      } else {
-        bool built = false;
-        try {
-          built = world.buildingLayer.setTile(building);
-        } on CoordinatesOutOfBounds catch (e) {
-          error(e.toString());
-        }
-        if (built) {
-          hoveredTile.unhighlight();
-          world.hoveredTile = building;
+    final building = switch (currentBuilding) {
+      CurrentBuilding.factory => Factory(coordinates),
+      CurrentBuilding.smallHouse => SmallHouse(coordinates),
+      CurrentBuilding.largeHouse => LargeHouse(coordinates),
+    };
+    if (world.money < building.price) {
+      error('Need \$${building.price}, but only have \$${world.money}');
+    } else {
+      try {
+        if (world.buildingLayer.setTile(building)) {
+          world.groundLayer.get(coordinates)?.unhighlight();
           building.highlight();
+
+          // Deduct the price of the building from the player's money
           world.money -= building.price;
         }
+      } on CoordinatesOutOfBounds catch (e) {
+        error(e.toString());
       }
     }
   }
@@ -43,28 +39,15 @@ final class BuildingBuildMode extends BuildMode {
   /// [coordinates].
   @override
   void destroy(UnitCoordinates coordinates) {
-    final hoveredBuilding = world.hoveredTile;
-    if (hoveredBuilding != null && hoveredBuilding is Building) {
-      hoveredBuilding.removeFromLayer();
+    final building = world.buildingLayer.get(coordinates);
+    if (building != null) {
+      building.removeFromLayer();
 
-      // Unhighlight the destroy building
-      hoveredBuilding.unhighlight();
-
-      // Highlight the tile under the mouse
-      int highestPriority = -1;
-      for (final layer in world.layers) {
-        if (layer.priority > highestPriority) {
-          final tile = layer.get(coordinates);
-          if (tile != null) {
-            world.hoveredTile = tile;
-            highestPriority = layer.priority;
-          }
-        }
-      }
-      world.hoveredTile?.highlight();
+      building.unhighlight();
+      world.groundLayer.get(coordinates)?.highlight();
 
       // Refund the player for a portion of the building's price
-      world.money += hoveredBuilding.price * kDestroyRefund;
+      world.money += building.price * kDestroyRefund;
     }
   }
 }

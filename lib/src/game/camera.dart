@@ -29,29 +29,35 @@ extension SustainaCityCamera on CameraComponent {
   UnitCoordinates halfRenderBounds() =>
       _halfRenderBounds(viewport.size, viewfinder.zoom);
 
-  /// Calls [callback] for each tile that in the range [topLeft], [bottomRight]
-  /// but not in the range [maskTopLeft], [maskBottomRight].
+  /// Calls [callback] for each tile in the range [topLeft], [bottomRight] but
+  /// not in the range [maskTopLeft], [maskBottomRight].
+  ///
+  /// [callback] should return true if the tile was handled, or false otherwise.
   static void _updateRenderedTilesHelper(
     UnitCoordinates topLeft,
     UnitCoordinates bottomRight,
     UnitCoordinates maskTopLeft,
     UnitCoordinates maskBottomRight,
     Layer layer,
-    void Function(Tile<dynamic> coordinates) callback,
+    bool Function(Tile<dynamic> coordinates) callback,
   ) {
+    final checkedCoordinates = <String>{};
     for (int y = topLeft.y; y <= bottomRight.y; ++y) {
       for (int x = topLeft.x; x <= bottomRight.x; ++x) {
-        if (x < maskTopLeft.x ||
-            x > maskBottomRight.x ||
-            y < maskTopLeft.y ||
-            y > maskBottomRight.y) {
-          final coordinates = UnitCoordinates(x, y);
-          final tile = layer.get(coordinates);
-          if (tile != null) {
-            callback(tile);
+        final coordinates = UnitCoordinates(x, y);
+        if (!checkedCoordinates.contains(coordinates.toString())) {
+          if (x < maskTopLeft.x ||
+              x > maskBottomRight.x ||
+              y < maskTopLeft.y ||
+              y > maskBottomRight.y) {
+            final tile = layer.get(coordinates);
+            if (tile != null && callback(tile)) {
+              tile.forEachUnit((coordinates, breakLoop) =>
+                  checkedCoordinates.add(coordinates.toString()));
+            }
+          } else {
+            x = maskBottomRight.x;
           }
-        } else {
-          x = maskBottomRight.x;
         }
       }
     }
@@ -104,13 +110,16 @@ extension SustainaCityCamera on CameraComponent {
         });
         if (!inBounds) {
           layer.remove(tile);
+          return true;
         }
+        return false;
       });
 
       // Show the tiles that are now in the viewport
       _updateRenderedTilesHelper(
           topLeft, bottomRight, oldTopLeft, oldBottomRight, layer, (tile) {
         layer.add(tile);
+        return true;
       });
     }
   }

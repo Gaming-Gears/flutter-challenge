@@ -26,24 +26,17 @@ const kInitialMoney = 100.0;
 
 final class SustainaCityWorld extends World
     with HasGameRef<SustainaCityGame>, Pauseable {
-  /// The current units that are in view of the camera.
-  final renderedUnits = <String>{};
-
   /// This layer houses all the ground tiles.
-  final groundLayer = Layer<Ground>(Grass.new, priority: 0);
+  final groundLayer = Layer<Ground>(Grass.new);
 
   /// Buildings are placed on this layer.
-  final buildingLayer = Layer<Building>((_) => null, priority: 1);
+  final buildingLayer = Layer<Building>((_) => null);
 
   /// All the layers in the world.
   late final layers = <Layer<Tile>>[groundLayer, buildingLayer];
 
   /// Maps tile types to the layers they should go in.
   final tileToLayer = <Type, Layer>{};
-
-  /// The tile that the mouse is currently hovering over. Null if the mouse
-  /// leaves the game area.
-  Tile<Object?>? hoveredTile;
 
   /// The amount of money the player has.
   double money = kInitialMoney;

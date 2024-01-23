@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart' hide PointerMoveEvent;
 import 'package:flutter/services.dart';
 
 import '../screens/game_screen.dart';
@@ -31,11 +31,16 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
         SecondaryTapDetector,
         KeyboardEvents,
         PanDetector,
-        ScrollDetector {
+        ScrollDetector,
+        PointerMoveCallbacks {
   /// The current build mode. This determines what happens when the players taps
   late BuildMode _buildMode;
 
+  /// Whether or not the game is paused.
   bool isPaused = false;
+
+  /// The currently hovered tile.
+  Tile? hoveredTile;
 
   SustainaCityGame() : super(world: SustainaCityWorld()) {
     pauseWhenBackgrounded = false;
@@ -105,5 +110,27 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   void onSecondaryTapUp(TapUpInfo info) {
     _buildMode.destroy(_toGlobalCoordinates(info.eventPosition.global));
     super.onSecondaryTapUp(info);
+  }
+
+  @override
+  void onPointerMove(PointerMoveEvent event) {
+    final position = _toGlobalCoordinates(event.devicePosition);
+
+    Tile? newTile;
+    for (final layer in world.layers) {
+      newTile = layer.get(position) ?? newTile;
+    }
+    if (newTile != hoveredTile) {
+      if (newTile != null) {
+        hoveredTile?.unhighlight();
+        newTile.highlight();
+        hoveredTile = newTile;
+      } else {
+        hoveredTile?.unhighlight();
+        hoveredTile = null;
+      }
+    }
+
+    super.onPointerMove(event);
   }
 }

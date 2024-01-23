@@ -21,6 +21,17 @@ final class TileNotFound {
   String toString() => 'No tile at $coordinates';
 }
 
+final class LayerNotAddedToArray implements Exception {
+  final Layer layer;
+
+  const LayerNotAddedToArray(this.layer) : super();
+
+  @override
+  String toString() =>
+      'Layer $layer was not added to the layers array. Current layers array: '
+      '${layer.world.layers}';
+}
+
 extension LayerArrayIndices on UnitCoordinates {
   /// Gets the [UnitCoordinates] associated with a given array index.
   static UnitCoordinates fromArrayIndex(int index) => UnitCoordinates(
@@ -39,10 +50,14 @@ final class Layer<T extends Tile<T>> extends Component
   late final List<Lazy<T?>> tiles;
 
   /// Creates a new layer, calling [initialTileGenerator] to populate each tile.
-  Layer(this.initialTileGenerator, {required super.priority}) : super();
+  Layer(this.initialTileGenerator) : super();
 
   @override
   FutureOr<void> onLoad() async {
+    priority = world.layers.indexOf(this);
+    if (priority == -1) {
+      throw LayerNotAddedToArray(this);
+    }
     world.tileToLayer[T] = this;
     tiles = List.generate(
         kMapSize * kMapSize,
