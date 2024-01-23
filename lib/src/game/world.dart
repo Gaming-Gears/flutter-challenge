@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flame/components.dart';
 
@@ -40,7 +41,20 @@ final class SustainaCityWorld extends World
   /// The amount of money the player has.
   double money = kInitialMoney;
 
+  Vector2 lastMousePosition = Vector2.zero();
+  double zoom = 1.0;
+
   SustainaCityWorld() : super();
+
+  @override
+  void render(Canvas canvas) {
+    canvas.save();
+    canvas.translate(-lastMousePosition.x * zoom + game.size.x / 2,
+        -lastMousePosition.y * zoom + game.size.y / 2);
+    canvas.scale(zoom);
+    // Render your game objects here
+    canvas.restore();
+  }
 
   @override
   FutureOr<void> onLoad() async {

@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flame/game.dart';
 
 import 'tiles/coordinates.dart';
 import 'tiles/layer.dart';
@@ -143,5 +144,20 @@ extension SustainaCityCamera on CameraComponent {
         (viewfinder.zoom + zoomChange * kZoomSpeed).clamp(kMinZoom, kMaxZoom);
     _clampPosition();
     _updateRenderedTiles(oldPosition, oldZoom);
+  }
+
+  /// Moves the camera to the specified position and zooms in or out.
+  void zoomToCursor(double zoomChange, Vector2 mousePosition) {
+    double newZoom = viewfinder.zoom + zoomChange * kZoomSpeed;
+    newZoom = newZoom.clamp(kMinZoom, kMaxZoom);
+
+    if (newZoom != viewfinder.zoom || viewport.position != -mousePosition) {
+      final oldPosition = viewport.position.clone();
+      final oldZoom = viewfinder.zoom;
+      pan(-mousePosition);
+      viewfinder.zoom = newZoom;
+      _clampPosition();
+      _updateRenderedTiles(oldPosition, oldZoom);
+    }
   }
 }

@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import 'package:flame/game.dart';
-import 'package:flutter/cupertino.dart' hide PointerMoveEvent;
+import 'package:flame/game.dart;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 import '../screens/game_screen.dart';
@@ -32,8 +32,12 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
         SecondaryTapDetector,
         KeyboardEvents,
         PanDetector,
+
+        MouseMovementDetector,
+
         ScrollDetector,
         PointerMoveCallbacks {
+
   /// The current build mode. This determines what happens when the players taps
   late BuildMode _buildMode;
 
@@ -71,9 +75,15 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   void onPanUpdate(DragUpdateInfo info) =>
       camera.pan(camera.viewport.position + info.delta.global);
 
+  /// Zooms the camera in or out.
   @override
   void onScroll(PointerScrollInfo info) =>
-      camera.zoom(info.scrollDelta.global.y);
+      camera.zoomToCursor(info.scrollDelta.global.y, world.lastMousePosition);
+
+  /// Called when the mouse is moved.
+  @override
+  void onMouseMove(PointerHoverInfo info) =>
+      world.lastMousePosition = info.eventPosition.global;
 
   @override
   KeyEventResult onKeyEvent(
