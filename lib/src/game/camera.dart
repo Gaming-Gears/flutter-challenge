@@ -10,11 +10,6 @@ const kMinZoom = 0.75;
 const kZoomSpeed = 0.003;
 
 extension SustainaCityCamera on CameraComponent {
-  /// Clamps the camera position to the bounds of the map.
-  void _clampPosition() => viewport.position.clampScalar(
-      -kMapBounds * Tile.pixelSize * viewfinder.zoom,
-      kMapBounds * Tile.pixelSize * viewfinder.zoom);
-
   /// Converts global coordinates in pixels to global coordinates in units with
   /// zoom applied.
   static UnitCoordinates _pixelsToUnitsWithZoom(
@@ -25,6 +20,11 @@ extension SustainaCityCamera on CameraComponent {
   static UnitCoordinates _halfRenderBounds(Vector2 size, double zoom) =>
       _pixelsToUnitsWithZoom(size, zoom * 2) +
       (UnitCoordinates(1, 1), checkBounds: false);
+
+  /// Clamps the camera position to the bounds of the map.
+  void _clampPosition() => viewport.position.clampScalar(
+      -kMapBounds * Tile.pixelSize * viewfinder.zoom,
+      kMapBounds * Tile.pixelSize * viewfinder.zoom);
 
   /// Returns half the screen size scaled with the zoom of the camera in units.
   UnitCoordinates halfRenderBounds() =>
