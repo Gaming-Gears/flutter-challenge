@@ -46,12 +46,17 @@ extension LayerArrayIndices on UnitCoordinates {
 /// Represents a single z-axis layer of tiles.
 final class Layer<T extends Tile<T>> extends Component
     with HasWorldReference<SustainaCityWorld>, HasGameRef<SustainaCityGame> {
+  /// The function used to generate the initial tiles in the layer.
   final T? Function(UnitCoordinates coordinates) initialTileGenerator;
+
+  /// The tiles in the layer. The initial tiles produced from
+  /// [initialTileGenerator] are lazy loaded.
   late final List<Lazy<T?>> tiles;
 
   /// Creates a new layer, calling [initialTileGenerator] to populate each tile.
   Layer(this.initialTileGenerator) : super();
 
+  /// Useful for adding the initial tiles to the layer in parallel.
   Iterable<Future<void>> _loadInitialTiles() sync* {
     final halfRenderBounds = gameRef.camera.halfRenderBounds();
     for (int y = -halfRenderBounds.y; y <= halfRenderBounds.y; ++y) {
