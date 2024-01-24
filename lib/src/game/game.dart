@@ -114,6 +114,9 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
         case LogicalKeyboardKey.digit3:
           _buildMode = BuildingBuildMode(CurrentBuilding.factory, world);
           return KeyEventResult.handled;
+        case LogicalKeyboardKey.digit4:
+          _buildMode = WireBuildMode(world);
+          return KeyEventResult.handled;
       }
     }
     return KeyEventResult.ignored;

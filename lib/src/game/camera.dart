@@ -1,5 +1,4 @@
 import 'package:flame/components.dart';
-import 'package:flame/game.dart';
 
 import 'tiles/coordinates.dart';
 import 'tiles/layer.dart';

@@ -25,6 +25,7 @@ final class BuildingBuildMode extends BuildMode {
       // building is successfully placed
       if (world.buildingLayer.setTile(building)) {
         world.money -= building.price;
+        info('Built $building, and spent \$${building.price}');
       }
     }
   }
@@ -38,7 +39,10 @@ final class BuildingBuildMode extends BuildMode {
       building.removeFromLayer();
 
       // Refund the player for a portion of the building's price
-      world.money += building.price * kDestroyRefund;
+      final refundPrice = building.price * kDestroyRefund;
+      world.money += refundPrice;
+
+      info('Destroyed $building, and refunded \$$refundPrice');
     }
   }
 }
