@@ -181,10 +181,10 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     super.onPointerMove(event);
   }
 
-  @override
-  void onTap() {
-    camera.viewport.add(InfoBoxComponent(
-        info: 'info', position: Vector2(500, 500), size: Vector2(200, 100)));
-    super.onTap();
-  }
+  // @override
+  // void onTap() {
+  //   camera.viewport.add(InfoBoxComponent(
+  //       info: 'info', position: Vector2(500, 500), size: Vector2(200, 100)));
+  //   super.onTap();
+  // }
 }
