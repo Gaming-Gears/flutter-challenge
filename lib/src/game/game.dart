@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -85,8 +86,9 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
 
   /// Zooms the camera in or out.
   @override
-  void onScroll(PointerScrollInfo info) =>
-      camera.zoomToCursor(info.scrollDelta.global.y, world.lastMousePosition);
+  void onScroll(PointerScrollInfo info) => camera.zoomToCursor(
+      (Platform.isMacOS ? 1 : -1) * info.scrollDelta.global.y,
+      world.lastMousePosition);
 
   /// Called when the mouse is moved.
   @override
@@ -179,11 +181,4 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     }
     super.onPointerMove(event);
   }
-
-  // @override
-  // void onTap() {
-  //   camera.viewport.add(InfoBoxComponent(
-  //       info: 'info', position: Vector2(500, 500), size: Vector2(200, 100)));
-  //   super.onTap();
-  // }
 }
