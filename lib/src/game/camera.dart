@@ -168,7 +168,7 @@ extension SustainaCityCamera on CameraComponent {
           theWorld.game.screenCoordinatesToGlobal(pointerPositionScreen);
 
       // Move the camera so that the pointer is still over the position.
-      viewport.position = viewport.position +
+      viewport.position +=
           (newPointerPositionWorld - pointerPositionWorld) * newZoom;
 
       _clampPosition();

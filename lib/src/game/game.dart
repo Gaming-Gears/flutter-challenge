@@ -68,7 +68,7 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   }
 
   /// Converts screen coordinates (in pixels) to global coordinates (pixels)
-  /// and applies pan.
+  /// and applies pan/zoom.
   Vector2 screenCoordinatesToGlobal(Vector2 screenCoordinates) =>
       (screenCoordinates - canvasSize.scaled(0.5) - camera.viewport.position) /
       camera.viewfinder.zoom;
