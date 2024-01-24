@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 import '../screens/game_screen.dart';
 import 'build_mode/build_mode.dart';
 import 'camera.dart';
-import 'info_box/info_box.dart';
 import 'tiles/coordinates.dart';
 import 'tiles/tile.dart';
 import 'world.dart';
