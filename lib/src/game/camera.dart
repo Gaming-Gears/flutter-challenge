@@ -7,7 +7,8 @@ import 'world.dart';
 
 const kMaxZoom = 3.0;
 const kMinZoom = 0.75;
-const kZoomSpeed = 0.003;
+const kZoomSpeed = 0.07;
+const kLerpFactor = 0.05;
 
 extension SustainaCityCamera on CameraComponent {
   /// Clamps the camera position to the bounds of the map.
@@ -153,10 +154,31 @@ extension SustainaCityCamera on CameraComponent {
     if (newZoom != viewfinder.zoom || viewport.position != -mousePosition) {
       final oldPosition = viewport.position.clone();
       final oldZoom = viewfinder.zoom;
-      pan(-mousePosition);
-      viewfinder.zoom = newZoom;
+
+      // Calculate target position for the camera
+      Vector2 targetPosition = -mousePosition + viewport.size / 2;
+
+      // Apply linear interpolation for smooth zooming
+      viewfinder.zoom = lerp(oldZoom, newZoom, kLerpFactor);
+
+      // Smoothly pan the camera to keep the cursor in focus
+      viewport.position = lerpVector2(oldPosition, targetPosition, kLerpFactor);
+
       _clampPosition();
       _updateRenderedTiles(oldPosition, oldZoom);
     }
+  }
+
+  // Linear interpolation for double values
+  double lerp(double start, double end, double t) {
+    return start + (end - start) * t;
+  }
+
+  // Linear interpolation for Vector2 values
+  Vector2 lerpVector2(Vector2 start, Vector2 end, double t) {
+    return Vector2(
+      lerp(start.x, end.x, t),
+      lerp(start.y, end.y, t),
+    );
   }
 }
