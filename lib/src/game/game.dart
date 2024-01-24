@@ -67,13 +67,18 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     return super.onLoad();
   }
 
-  /// Converts screen coordinates (with pan/zoom) to global coordinates (units)
-  UnitCoordinates? _toGlobalCoordinates(Vector2 screenCoordinates) {
+  /// Converts screen coordinates (in pixels) to global coordinates (pixels)
+  /// and applies pan.
+  Vector2 screenCoordinatesToGlobal(Vector2 screenCoordinates) =>
+      (screenCoordinates - canvasSize.scaled(0.5) - camera.viewport.position) /
+      camera.viewfinder.zoom;
+
+  /// Converts screen coordinates (in pixels) to global coordinates (units) and
+  /// applies the pan and zoom. Returns null if the coordinates are out of
+  /// bounds.
+  UnitCoordinates? _screenCoordinatesToGlobal(Vector2 screenCoordinates) {
     try {
-      return ((screenCoordinates -
-                  canvasSize.scaled(0.5) -
-                  camera.viewport.position) /
-              (camera.viewfinder.zoom * Tile.pixelSize))
+      return (screenCoordinatesToGlobal(screenCoordinates) / Tile.pixelSize)
           .toUnits();
     } on CoordinatesOutOfBounds catch (_) {
       return null;
@@ -87,13 +92,9 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   /// Zooms the camera in or out.
   @override
   void onScroll(PointerScrollInfo info) => camera.zoomToCursor(
-      (Platform.isMacOS ? 1 : -1) * info.scrollDelta.global.y,
-      world.lastMousePosition);
-
-  /// Called when the mouse is moved.
-  @override
-  void onMouseMove(PointerHoverInfo info) =>
-      world.lastMousePosition = info.eventPosition.global;
+        (Platform.isMacOS ? 1 : -1) * info.scrollDelta.global.y,
+        info.eventPosition.global,
+      );
 
   @override
   KeyEventResult onKeyEvent(
@@ -154,7 +155,7 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   /// Left-click handler
   @override
   void onTapUp(TapUpInfo info) {
-    final position = _toGlobalCoordinates(info.eventPosition.global);
+    final position = _screenCoordinatesToGlobal(info.eventPosition.global);
     if (position != null) {
       _buildMode.build(position);
       updateHighlightedTile(position);
@@ -165,7 +166,7 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   /// Right-click handler
   @override
   void onSecondaryTapUp(TapUpInfo info) {
-    final position = _toGlobalCoordinates(info.eventPosition.global);
+    final position = _screenCoordinatesToGlobal(info.eventPosition.global);
     if (position != null) {
       _buildMode.destroy(position);
       updateHighlightedTile(position);
@@ -175,7 +176,7 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
 
   @override
   void onPointerMove(PointerMoveEvent event) {
-    final position = _toGlobalCoordinates(event.devicePosition);
+    final position = _screenCoordinatesToGlobal(event.devicePosition);
     if (position != null) {
       updateHighlightedTile(position);
     }

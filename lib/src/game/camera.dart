@@ -7,23 +7,23 @@ import 'world.dart';
 
 const kMaxZoom = 3.0;
 const kMinZoom = 0.75;
-const kZoomSpeed = 0.07;
-const kLerpFactor = 0.05;
+const kZoomSpeed = 0.003;
 
 extension SustainaCityCamera on CameraComponent {
   /// Clamps the camera position to the bounds of the map.
   void _clampPosition() => viewport.position.clampScalar(
-      -kMapBounds * Tile.pixelSize * viewfinder.zoom + 1,
+      -kMapBounds * Tile.pixelSize * viewfinder.zoom,
       kMapBounds * Tile.pixelSize * viewfinder.zoom);
 
-  /// Returns [position] scaled with [zoom] in units.
-  static UnitCoordinates _globalPixelCoordinatesToUnits(
+  /// Converts global coordinates in pixels to global coordinates in units with
+  /// zoom applied.
+  static UnitCoordinates _pixelsToUnitsWithZoom(
           Vector2 position, double zoom) =>
       (position / (Tile.pixelSize * zoom)).toUnits();
 
   /// Returns half [size] scaled with [zoom] in units, with an extra padding.
   static UnitCoordinates _halfRenderBounds(Vector2 size, double zoom) =>
-      _globalPixelCoordinatesToUnits(size, zoom * 2) +
+      _pixelsToUnitsWithZoom(size, zoom * 2) +
       (UnitCoordinates(1, 1), checkBounds: false);
 
   /// Returns half the screen size scaled with the zoom of the camera in units.
@@ -71,7 +71,7 @@ extension SustainaCityCamera on CameraComponent {
 
     // The new position of the camera in units
     final positionUnits =
-        _globalPixelCoordinatesToUnits(-viewport.position, viewfinder.zoom);
+        _pixelsToUnitsWithZoom(-viewport.position, viewfinder.zoom);
 
     // Move the background so that it is centered on the camera
     final theWorld = world as SustainaCityWorld;
@@ -81,8 +81,7 @@ extension SustainaCityCamera on CameraComponent {
     final oldHalfBounds = _halfRenderBounds(viewport.size, oldZoom);
 
     // The old position of the camera in units
-    final oldPositionUnits =
-        _globalPixelCoordinatesToUnits(-oldPosition, oldZoom);
+    final oldPositionUnits = _pixelsToUnitsWithZoom(-oldPosition, oldZoom);
 
     // Calculate the new global viewport bounds in units
     final topLeft = ((positionUnits - (halfBounds, checkBounds: false)))
@@ -147,38 +146,33 @@ extension SustainaCityCamera on CameraComponent {
   }
 
   /// Moves the camera to the specified position and zooms in or out.
-  void zoomToCursor(double zoomChange, Vector2 mousePosition) {
-    double newZoom = viewfinder.zoom + zoomChange * kZoomSpeed;
-    newZoom = newZoom.clamp(kMinZoom, kMaxZoom);
+  void zoomToCursor(double zoomChange, Vector2 pointerPositionScreen) {
+    final oldZoom = viewfinder.zoom;
+    final newZoom =
+        (viewfinder.zoom + zoomChange * kZoomSpeed).clamp(kMinZoom, kMaxZoom);
 
-    if (newZoom != viewfinder.zoom || viewport.position != -mousePosition) {
+    if (newZoom != oldZoom) {
       final oldPosition = viewport.position.clone();
-      final oldZoom = viewfinder.zoom;
 
-      // Calculate target position for the camera
-      Vector2 targetPosition = -mousePosition + viewport.size / 2;
+      // Calculate the position of the pointer in world coordinates before the
+      // zoom.
+      final theWorld = world as SustainaCityWorld;
+      final pointerPositionWorld =
+          theWorld.game.screenCoordinatesToGlobal(pointerPositionScreen);
 
-      // Apply linear interpolation for smooth zooming
-      viewfinder.zoom = lerp(oldZoom, newZoom, kLerpFactor);
+      // Apply the zoom
+      viewfinder.zoom = newZoom;
 
-      // Smoothly pan the camera to keep the cursor in focus
-      viewport.position = lerpVector2(oldPosition, targetPosition, kLerpFactor);
+      // Calculate the new position of the pointer after the zoom.
+      final newPointerPositionWorld =
+          theWorld.game.screenCoordinatesToGlobal(pointerPositionScreen);
+
+      // Move the camera so that the pointer is still over the position.
+      viewport.position = viewport.position +
+          (newPointerPositionWorld - pointerPositionWorld) * newZoom;
 
       _clampPosition();
       _updateRenderedTiles(oldPosition, oldZoom);
     }
-  }
-
-  // Linear interpolation for double values
-  double lerp(double start, double end, double t) {
-    return start + (end - start) * t;
-  }
-
-  // Linear interpolation for Vector2 values
-  Vector2 lerpVector2(Vector2 start, Vector2 end, double t) {
-    return Vector2(
-      lerp(start.x, end.x, t),
-      lerp(start.y, end.y, t),
-    );
   }
 }
