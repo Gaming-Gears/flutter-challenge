@@ -182,10 +182,4 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
     }
     super.onPointerMove(event);
   }
-
-  @override
-  void onGameResize(Vector2 size) {
-    super.onGameResize(size);
-    camera.halfRenderBounds();
-  }
 }

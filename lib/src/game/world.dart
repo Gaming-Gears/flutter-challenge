@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flame/components.dart';
 
 import 'background.dart';
+import 'camera.dart';
 import 'game.dart';
 import 'tiles/buildings/building.dart';
 import 'tiles/coordinates.dart';
@@ -58,4 +59,10 @@ final class SustainaCityWorld extends World
 
   @override
   void updateGame(double dt) => money += kMoneyRate * dt;
+
+  @override
+  void onGameResize(Vector2 size) {
+    game.camera.reRenderOnReSize(size);
+    super.onGameResize(size);
+  }
 }

@@ -175,4 +175,12 @@ extension SustainaCityCamera on CameraComponent {
       _updateRenderedTiles(oldPosition, oldZoom);
     }
   }
+
+  /// Re-renders the camera on resize.
+  void reRenderOnReSize(Vector2 newSize) {
+    final oldViewportSize = viewport.size;
+    viewport.size = newSize;
+    _clampPosition();
+    _updateRenderedTiles(oldViewportSize, viewfinder.zoom);
+  }
 }
