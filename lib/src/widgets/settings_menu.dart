@@ -6,6 +6,7 @@ import 'package:nes_ui/nes_ui.dart';
 import '../game/game.dart';
 import '../screens/game_screen.dart';
 import 'dialog_box.dart';
+import 'slider.dart';
 
 Future<void> showSettingsMenu(
   BuildContext context,
@@ -23,71 +24,79 @@ final class SettingsMenu extends StatelessWidget {
   const SettingsMenu({super.key}) : super();
 
   @override
-  Widget build(BuildContext context) => Column(
-        children: [
-          const Text('Settings'),
-          const SizedBox(height: 12),
-          NesButton(
-            type: NesButtonType.normal,
-            child: const Text('Resume'),
-            onPressed: () => Navigator.pop(context),
-          ),
-          const SizedBox(height: 12),
-          NesButton(
-            type: NesButtonType.normal,
-            child: const Text('Exit Game'),
-            onPressed: () =>
-                Navigator.popUntil(context, (route) => route.isFirst),
-          ),
-          const SizedBox(height: 25),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Music'),
-              const SizedBox(width: 20),
-              Row(
-                children: [
-                  NesButton(
-                    type: NesButtonType.success,
-                    child: const Text('On'),
-                    onPressed: () {},
-                  ),
-                  const SizedBox(width: 8),
-                  NesButton(
-                    type: NesButtonType.normal,
-                    child: const Text('Off'),
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Sound FX'),
-              const SizedBox(width: 20),
-              Row(
-                children: [
-                  NesButton(
-                    type: NesButtonType.success,
-                    child: const Text('On'),
-                    onPressed: () {},
-                  ),
-                  const SizedBox(width: 8),
-                  NesButton(
-                    type: NesButtonType.normal,
-                    child: const Text('Off'),
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(30.0),
+        child: Column(
+          children: [
+            const Text('Settings'),
+            const SizedBox(height: 12),
+            NesButton(
+              type: NesButtonType.normal,
+              child: const Text('Resume'),
+              onPressed: () => Navigator.pop(context),
+            ),
+            const SizedBox(height: 12),
+            NesButton(
+              type: NesButtonType.normal,
+              child: const Text('Exit Game'),
+              onPressed: () =>
+                  Navigator.popUntil(context, (route) => route.isFirst),
+            ),
+            const SizedBox(height: 25),
+            Column(
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Music'),
+                    const SizedBox(width: 20),
+                    Row(
+                      children: [
+                        NesButton(
+                          type: NesButtonType.success,
+                          child: const Text('On'),
+                          onPressed: () {},
+                        ),
+                        const SizedBox(width: 8),
+                        NesButton(
+                          type: NesButtonType.normal,
+                          child: const Text('Off'),
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Sound FX'),
+                const SizedBox(width: 20),
+                Row(
+                  children: [
+                    NesButton(
+                      type: NesButtonType.success,
+                      child: const Text('On'),
+                      onPressed: () {},
+                    ),
+                    const SizedBox(width: 8),
+                    NesButton(
+                      type: NesButtonType.normal,
+                      child: const Text('Off'),
+                      onPressed: () {},
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SliderWidget(),
+          ],
+        ),
       );
 }
 
