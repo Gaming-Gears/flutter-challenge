@@ -2,6 +2,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nes_ui/nes_ui.dart';
+import '../widgets/settings_menu.dart';
 
 import 'game_screen.dart';
 
@@ -25,6 +26,16 @@ class MenuScreen extends StatelessWidget {
                   context,
                   NesVerticalGridTransition.route<void>(
                       pageBuilder: (_, __, ___) => const GameScreen()),
+                ),
+              ),
+              NesButton(
+                type: NesButtonType.normal,
+                child: const Text('Settings'),
+                onPressed: () => Navigator.push(
+                  context,
+                  NesVerticalGridTransition.route<void>(
+                      pageBuilder: (_, __, ___) =>
+                          const Scaffold(body: SettingsMenu())),
                 ),
               ),
               Visibility(
