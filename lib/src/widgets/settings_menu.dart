@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:nes_ui/nes_ui.dart';
 
+import '../game/audio_controller.dart';
 import '../game/game.dart';
 import '../screens/game_screen.dart';
 import 'dialog_box.dart';
@@ -21,83 +22,100 @@ Future<void> showSettingsMenu(
 }
 
 final class SettingsMenu extends StatelessWidget {
-  const SettingsMenu({super.key}) : super();
+  const SettingsMenu({super.key});
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(30.0),
-        child: Column(
-          children: [
-            const Text('Settings'),
-            const SizedBox(height: 12),
-            NesButton(
-              type: NesButtonType.normal,
-              child: const Text('Resume'),
-              onPressed: () => Navigator.pop(context),
-            ),
-            const SizedBox(height: 12),
-            NesButton(
-              type: NesButtonType.normal,
-              child: const Text('Exit Game'),
-              onPressed: () =>
-                  Navigator.popUntil(context, (route) => route.isFirst),
-            ),
-            const SizedBox(height: 25),
-            Column(
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Music'),
-                    const SizedBox(width: 20),
-                    Row(
-                      children: [
-                        NesButton(
-                          type: NesButtonType.success,
-                          child: const Text('On'),
-                          onPressed: () {},
-                        ),
-                        const SizedBox(width: 8),
-                        NesButton(
-                          type: NesButtonType.normal,
-                          child: const Text('Off'),
-                          onPressed: () {},
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-              ],
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Sound FX'),
-                const SizedBox(width: 20),
-                Row(
-                  children: [
-                    NesButton(
-                      type: NesButtonType.success,
-                      child: const Text('On'),
-                      onPressed: () {},
-                    ),
-                    const SizedBox(width: 8),
-                    NesButton(
-                      type: NesButtonType.normal,
-                      child: const Text('Off'),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SliderWidget(),
-          ],
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: FractionallySizedBox(
+          widthFactor: 0.8, // 80% of the screen width
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Text('Settings', style: TextStyle(fontSize: 24)),
+              const SizedBox(height: 12),
+              NesButton(
+                type: NesButtonType.normal,
+                child: const Text('Resume'),
+                onPressed: () => Navigator.pop(context),
+              ),
+              const SizedBox(height: 12),
+              NesButton(
+                type: NesButtonType.normal,
+                child: const Text('Exit Game'),
+                onPressed: () =>
+                    Navigator.popUntil(context, (route) => route.isFirst),
+              ),
+              const SizedBox(height: 25),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Music'),
+                      Row(
+                        children: [
+                          NesButton(
+                            type: NesButtonType.success,
+                            child: const Text('On'),
+                            onPressed: () => AudioController().resumeBgm(),
+                          ),
+                          const SizedBox(width: 8),
+                          NesButton(
+                            type: NesButtonType.normal,
+                            child: const Text('Off'),
+                            onPressed: () => AudioController().stopBgm(),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Sound FX'),
+                  Row(
+                    children: [
+                      NesButton(
+                        type: NesButtonType.success,
+                        child: const Text('On'),
+                        onPressed: () => AudioController().resumeBgm(),
+                      ),
+                      const SizedBox(width: 8),
+                      NesButton(
+                        type: NesButtonType.normal,
+                        child: const Text('Off'),
+                        onPressed: () => AudioController().stopSfx(),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(flex: 1, child: Text('Volume')),
+                  Flexible(
+                    flex: 1,
+                    fit: FlexFit.tight,
+                    child: SliderWidget(),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 final class ShowSettingsMenu extends StatefulWidget {

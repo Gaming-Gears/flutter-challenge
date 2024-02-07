@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../game/audio_controller.dart';
+
 // Custom NES Slider Thumb Shape
 class NesSliderThumbShape extends SliderComponentShape {
   final double thumbSize;
@@ -197,7 +199,7 @@ class _SliderWidgetState extends State<SliderWidget> {
     return NesSlider(
       initialValue: 0.5,
       onChanged: (newValue) {
-        setState(() {});
+        setState(() => AudioController().setBgmVolume(newValue));
       },
       nesSliderTheme: const NesSliderTheme(
         activeTrackColor: Colors.black,

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 
+import 'audio_controller.dart';
 import 'background.dart';
 import 'camera.dart';
 import 'game.dart';
@@ -52,7 +53,9 @@ final class SustainaCityWorld extends World
     await Future.wait<void>([
       ...layers.map((layer) async => await add(layer)),
       (() async => await add(background))(),
-      (() async => await add(backgroundHover))()
+      (() async => await add(backgroundHover))(),
+      Future(() => AudioController().preloadAudioFiles(['background.mp3'])),
+      Future(() => AudioController().playBgm('background.mp3')),
     ]);
     return await super.onLoad();
   }
