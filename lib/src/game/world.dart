@@ -46,6 +46,9 @@ final class SustainaCityWorld extends World
   /// The amount of money the player has.
   double money = kInitialMoney;
 
+  /// The sensitivity of the mouse.
+  late double mouseSensivity;
+
   SustainaCityWorld() : super();
 
   @override

@@ -143,6 +143,18 @@ class _SettingsMenuState extends State<SettingsMenu> {
                   ),
                 ],
               ),
+              const SizedBox(height: 10),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(flex: 1, child: Text('Mouse Sensitivity')),
+                  Flexible(
+                    flex: 1,
+                    fit: FlexFit.tight,
+                    child: SliderWidget(),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
