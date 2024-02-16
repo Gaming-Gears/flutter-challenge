@@ -21,9 +21,16 @@ Future<void> showSettingsMenu(
   game.isPaused = false;
 }
 
-final class SettingsMenu extends StatelessWidget {
+final class SettingsMenu extends StatefulWidget {
   const SettingsMenu({super.key});
 
+  @override
+  State<SettingsMenu> createState() => _SettingsMenuState();
+}
+
+class _SettingsMenuState extends State<SettingsMenu> {
+  bool isMusicOn = true;
+  bool isSfxOn = true;
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -60,15 +67,29 @@ final class SettingsMenu extends StatelessWidget {
                       Row(
                         children: [
                           NesButton(
-                            type: NesButtonType.success,
+                            type: isMusicOn
+                                ? NesButtonType.success
+                                : NesButtonType.normal,
                             child: const Text('On'),
-                            onPressed: () => AudioController().resumeBgm(),
+                            onPressed: () {
+                              setState(() {
+                                isMusicOn = true;
+                              });
+                              AudioController().resumeBgm();
+                            },
                           ),
                           const SizedBox(width: 8),
                           NesButton(
-                            type: NesButtonType.normal,
+                            type: isMusicOn
+                                ? NesButtonType.normal
+                                : NesButtonType.error,
                             child: const Text('Off'),
-                            onPressed: () => AudioController().stopBgm(),
+                            onPressed: () {
+                              setState(() {
+                                isMusicOn = false;
+                              });
+                              AudioController().stopBgm();
+                            },
                           ),
                         ],
                       ),
@@ -84,16 +105,28 @@ final class SettingsMenu extends StatelessWidget {
                   Row(
                     children: [
                       NesButton(
-                        type: NesButtonType.success,
-                        child: const Text('On'),
-                        onPressed: () => AudioController().resumeBgm(),
-                      ),
+                          type: isSfxOn
+                              ? NesButtonType.success
+                              : NesButtonType.normal,
+                          child: const Text('On'),
+                          onPressed: () {
+                            setState(() {
+                              isSfxOn = true;
+                            });
+                            AudioController().resumeBgm();
+                          }),
                       const SizedBox(width: 8),
                       NesButton(
-                        type: NesButtonType.normal,
-                        child: const Text('Off'),
-                        onPressed: () => AudioController().stopSfx(),
-                      ),
+                          type: isSfxOn
+                              ? NesButtonType.normal
+                              : NesButtonType.error,
+                          child: const Text('Off'),
+                          onPressed: () {
+                            setState(() {
+                              isSfxOn = false;
+                            });
+                            AudioController().stopSfx();
+                          }),
                     ],
                   ),
                 ],
@@ -103,6 +136,18 @@ final class SettingsMenu extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(flex: 1, child: Text('Volume')),
+                  Flexible(
+                    flex: 1,
+                    fit: FlexFit.tight,
+                    child: SliderWidget(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(flex: 1, child: Text('Mouse Sensitivity')),
                   Flexible(
                     flex: 1,
                     fit: FlexFit.tight,
