@@ -11,12 +11,14 @@ Future<void> main() async {
   await Flame.device.setLandscape();
   await Flame.device.fullScreen();
   await initializeCache();
-  runApp(MaterialApp(
-    title: 'SustainaCity',
-    theme: flutterNesTheme(),
-    home: const MenuScreen(),
-  ));
-
+  runApp(
+    MaterialApp(
+      title: 'SustainaCity',
+      theme: flutterNesTheme(),
+      debugShowCheckedModeBanner: false,
+      home: const MenuScreen(),
+    ),
+  );
   doWhenWindowReady(() {
     appWindow.alignment = Alignment.center;
     appWindow.show();
