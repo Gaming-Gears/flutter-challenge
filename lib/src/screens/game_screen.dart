@@ -7,6 +7,12 @@ import '../widgets/pause_button.dart';
 import '../widgets/settings_menu.dart';
 import '../widgets/shop_button.dart';
 
+List<Map<String, String>> shoppingItems = [
+  {'Factory': 'assets/images/factory.png'},
+  {'House': 'assets/images/house.png'},
+  {'Solar Panel': 'assets/images/solar_panel.png'},
+];
+
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
 
@@ -42,17 +48,22 @@ Drawer drawer(BuildContext context) => Drawer(
           ),
           const Divider(),
           const SizedBox(height: 24),
-          ListTile(
-            title: const Text('Factory'),
-            leading: Image.asset(
-              'assets/images/factory.png',
-              width: 64,
-              height: 64,
-            ),
-            trailing: NesButton(
-              type: NesButtonType.primary,
-              onPressed: () {},
-              child: const Text('Buy'),
+          ...shoppingItems.map(
+            (item) => Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListTile(
+                title: Text(item.keys.first),
+                leading: Image.asset(
+                  item.values.first,
+                  width: 64,
+                  height: 64,
+                ),
+                trailing: NesButton(
+                  type: NesButtonType.primary,
+                  onPressed: () {},
+                  child: const Text('Buy'),
+                ),
+              ),
             ),
           ),
         ],
