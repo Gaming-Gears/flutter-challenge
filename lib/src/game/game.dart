@@ -57,6 +57,7 @@ final class SustainaCityGame extends FlameGame<SustainaCityWorld>
   void onMount() {
     /// Add the pause button to the game on top left-corner.
     overlays.add(GameScreen.pauseKey);
+    overlays.add(GameScreen.shopButton);
     super.onMount();
   }
 
