@@ -35,7 +35,7 @@ class MenuScreen extends StatelessWidget {
                   context,
                   NesVerticalGridTransition.route<void>(
                       pageBuilder: (_, __, ___) =>
-                          const Scaffold(body: SettingsMenu())),
+                          Scaffold(body: SettingsMenu())),
                 ),
               ),
               Visibility(

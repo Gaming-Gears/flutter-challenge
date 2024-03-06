@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nes_ui/nes_ui.dart';
 
+import '../game/audio_controller.dart';
 import '../game/game.dart';
 import 'settings_menu.dart';
 
@@ -19,7 +20,10 @@ class PauseButton extends StatelessWidget {
             height: 20,
             width: 20,
           ),
-          onPressed: () => showSettingsMenu(context, game),
+          onPressed: () {
+            AudioController().stopBgm();
+            showSettingsMenu(context, game, false, false);
+          },
         ),
       );
 }

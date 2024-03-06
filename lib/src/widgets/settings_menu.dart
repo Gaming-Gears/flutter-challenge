@@ -12,25 +12,32 @@ import 'slider.dart';
 Future<void> showSettingsMenu(
   BuildContext context,
   SustainaCityGame game,
+  bool isMusicOn,
+  bool isSfxOn,
 ) async {
   game.isPaused = true;
   await StyledDialog.show<void>(
     context: context,
-    builder: (_) => const SettingsMenu(),
+    builder: (_) => SettingsMenu(
+      isMusicOn: isMusicOn,
+      isSfxOn: isSfxOn,
+    ),
   );
   game.isPaused = false;
 }
 
+// ignore: must_be_immutable
 final class SettingsMenu extends StatefulWidget {
-  const SettingsMenu({super.key});
+  bool isMusicOn;
+  bool isSfxOn;
+  SettingsMenu(
+      {requested, this.isMusicOn = true, this.isSfxOn = true, super.key});
 
   @override
   State<SettingsMenu> createState() => _SettingsMenuState();
 }
 
 class _SettingsMenuState extends State<SettingsMenu> {
-  bool isMusicOn = true;
-  bool isSfxOn = true;
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -67,26 +74,26 @@ class _SettingsMenuState extends State<SettingsMenu> {
                       Row(
                         children: [
                           NesButton(
-                            type: isMusicOn
+                            type: widget.isMusicOn
                                 ? NesButtonType.success
                                 : NesButtonType.normal,
                             child: const Text('On'),
                             onPressed: () {
                               setState(() {
-                                isMusicOn = true;
+                                widget.isMusicOn = true;
                               });
                               AudioController().resumeBgm();
                             },
                           ),
                           const SizedBox(width: 8),
                           NesButton(
-                            type: isMusicOn
+                            type: widget.isMusicOn
                                 ? NesButtonType.normal
                                 : NesButtonType.error,
                             child: const Text('Off'),
                             onPressed: () {
                               setState(() {
-                                isMusicOn = false;
+                                widget.isMusicOn = false;
                               });
                               AudioController().stopBgm();
                             },
@@ -105,25 +112,25 @@ class _SettingsMenuState extends State<SettingsMenu> {
                   Row(
                     children: [
                       NesButton(
-                          type: isSfxOn
+                          type: widget.isSfxOn
                               ? NesButtonType.success
                               : NesButtonType.normal,
                           child: const Text('On'),
                           onPressed: () {
                             setState(() {
-                              isSfxOn = true;
+                              widget.isSfxOn = true;
                             });
                             AudioController().resumeBgm();
                           }),
                       const SizedBox(width: 8),
                       NesButton(
-                          type: isSfxOn
+                          type: widget.isSfxOn
                               ? NesButtonType.normal
                               : NesButtonType.error,
                           child: const Text('Off'),
                           onPressed: () {
                             setState(() {
-                              isSfxOn = false;
+                              widget.isSfxOn = false;
                             });
                             AudioController().stopSfx();
                           }),
@@ -178,6 +185,8 @@ final class _ShowSettingsMenuState extends State<ShowSettingsMenu> {
     Timer.run(() => showSettingsMenu(
           context,
           widget.game,
+          false,
+          false,
         ).then((_) => widget.game.overlays.remove(GameScreen.settingsMenu)));
     super.initState();
   }
